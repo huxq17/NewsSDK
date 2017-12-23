@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/margin_8dp"
+    android:foreground="@drawable/item_selector"
     android:transitionName="@string/top_news_parent">
 
     <RelativeLayout

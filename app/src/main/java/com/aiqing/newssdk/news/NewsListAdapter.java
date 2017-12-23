@@ -2,15 +2,16 @@ package com.aiqing.newssdk.news;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
+import com.aiqing.newssdk.view.NewsItemView;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 import com.squareup.picasso.Picasso;
@@ -31,11 +32,12 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
         float width = mContext.getResources().getDimension(R.dimen.news_image_width);
         widthPx = (int) width;
         heighPx = widthPx * 3 / 4;
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
     @Override
     public RecyclerView.ViewHolder onCreate(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.topnews_item, parent, false);
+        View view = new NewsItemView(mContext);
         return new ViewHolder(view);
     }
 

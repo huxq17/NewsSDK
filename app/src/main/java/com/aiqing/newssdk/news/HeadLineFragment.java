@@ -38,14 +38,30 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
     private boolean loading = false;
     private Disposable mDisposable;
     private LinearLayoutManager mLinearLayoutManager;
+    private Category mCategory;
+    private static final String KEY_CATEGORY = "category";
+
+    public static HeadLineFragment create(Category category) {
+        HeadLineFragment fragment = new HeadLineFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(KEY_CATEGORY, category);
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Bundle args = getArguments();
+        if (args != null) {
+            mCategory = (Category) args.getSerializable(KEY_CATEGORY);
+        }
+
         View view = getActivity().getLayoutInflater().inflate(R.layout.headline_newslist_fragment, null, false);
-        mRefresh  = (SwipeRefreshLayout) view.findViewById(R.id.refresh);
+        mRefresh = (SwipeRefreshLayout) view.findViewById(R.id.refresh);
         mEmptyMsg = (TextView) view.findViewById(R.id.empty_msg);
         mNewsRecycler = (MagicRecyclerView) view.findViewById(R.id.newsRecycler);
         bindPresenter();
+
         mLinearLayoutManager = new LinearLayoutManager(this.getContext());
         mNewsRecycler.setLayoutManager(mLinearLayoutManager);
         //屏蔽掉默认的动画，防止刷新时图片闪烁
@@ -95,7 +111,7 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
         mRefresh.setRefreshing(true);
-        refreshNews();
+//        refreshNews();
         mPresenter.loadCache();
         View footer = mNewsRecycler.getFooterView();
         if (footer != null) {
@@ -111,6 +127,11 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
     @Override
     public void showRefreshBar() {
         mRefresh.setRefreshing(true);
+    }
+
+    @Override
+    public Category getCategory() {
+        return mCategory;
     }
 
     @Override
@@ -233,8 +254,8 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
         mPresenter.onDestory();
     }
 
-    private void subscribeEvent(){
-        if (mDisposable!=null){
+    private void subscribeEvent() {
+        if (mDisposable != null) {
             mDisposable.dispose();
         }
         RxBus.getDefault()

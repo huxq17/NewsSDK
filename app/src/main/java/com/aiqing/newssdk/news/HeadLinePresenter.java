@@ -35,6 +35,10 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
     public void refreshNews() {
         mNewsListFrag.showRefreshBar();
         currentIndex = 0;
+        final Category category = mNewsListFrag.getCategory();
+        if(category!=null){
+            ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString());
+        }
         ApiManager.getInstence().getTopNewsServie()
                 .getTopNews(currentIndex + "")
                 .map(new Function<TopNewsList, ArrayList<NewsBean>>() {

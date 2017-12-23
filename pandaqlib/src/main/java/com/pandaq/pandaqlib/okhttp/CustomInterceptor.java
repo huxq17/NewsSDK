@@ -21,6 +21,7 @@ public class CustomInterceptor implements Interceptor {
                 .newBuilder()
                 .header("User-agent", "Mozilla/4.0")
                 .build();
+        Log.e("tag", "request url=" + request.url() + ";method=" + request.method());
         return chain.proceed(request);
     }
 }

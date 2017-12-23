@@ -15,6 +15,8 @@ public interface NewsContract {
     interface View extends ImpBaseView {
         void showRefreshBar();
 
+        Category getCategory();
+
         void hideRefreshBar();
 
         void refreshNews();

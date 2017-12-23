@@ -10,18 +10,14 @@ import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
 
-/**
- * Created by Administrator on 2017/12/20.
- */
-
 public class NewsItemView extends CardView {
+
     public NewsItemView(Context context) {
         super(context);
         setId(R.id.item_cardview);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setTransitionName(getResources().getString(R.string.top_news_parent));
         }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             setForeground(context.getResources().getDrawable(R.drawable.ripple_item));
         }
