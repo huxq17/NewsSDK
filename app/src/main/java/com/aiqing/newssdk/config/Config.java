@@ -12,7 +12,7 @@ public class Config {
     public static String NETEASY_NEWS_API = "http://c.m.163.com/nc/article/";
     public static String MOVIE_API_URL = "http://api.svipmovie.com/front/";
     public static String GITHUB_API_URL = "https://api.github.com/";
-    public static String SDK_API_URL = "http://47.97.108.156:3033/v1/news/list";
+    public static String SDK_API_URL = "http://47.97.108.156:3033/";
     /**
      * 视频分类ID
      */

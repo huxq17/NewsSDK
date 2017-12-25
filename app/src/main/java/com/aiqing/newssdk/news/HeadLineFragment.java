@@ -110,7 +110,7 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-        mRefresh.setRefreshing(true);
+//        mRefresh.setRefreshing(true);
 //        refreshNews();
         mPresenter.loadCache();
         View footer = mNewsRecycler.getFooterView();

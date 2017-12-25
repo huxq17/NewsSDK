@@ -13,7 +13,6 @@ import java.util.ArrayList;
 public class TopNewsList {
 
     @SerializedName(Constants.NETEASY_NEWS_HEADLINE)
-
     private ArrayList<NewsBean> mTopNewsArrayList;
 
     public ArrayList<NewsBean> getTopNewsArrayList() {

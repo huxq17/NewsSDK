@@ -37,7 +37,18 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         currentIndex = 0;
         final Category category = mNewsListFrag.getCategory();
         if(category!=null){
-            ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString());
+            ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString())
+                    .map(new Function<SDKNewsList, ArrayList<NewsBean>>() {
+
+                        @Override
+                        public ArrayList<NewsBean> apply(SDKNewsList topNewsList) throws Exception {
+
+                            return null;
+                        }
+                    })
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe();
         }
         ApiManager.getInstence().getTopNewsServie()
                 .getTopNews(currentIndex + "")
