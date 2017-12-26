@@ -2,6 +2,7 @@ package com.aiqing.newssdk.news;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class SDKNewsList {
@@ -48,7 +49,7 @@ public class SDKNewsList {
         this.data = data;
     }
 
-    public static class DataBean {
+    public static class DataBean implements Serializable{
         /**
          * title : 月销量破5万，为什么还有很多人攻击哈弗H6
          * abstract : 每一款车型上市都要挑战哈弗H6，但是都会被哈弗H6虐的体无完肤。
@@ -153,7 +154,7 @@ public class SDKNewsList {
             this.media_avatar_url = media_avatar_url;
         }
 
-        public static class MiddleImageBean {
+        public static class MiddleImageBean implements Serializable{
             /**
              * height : 401
              * uri : list/50ed0000a9565dadeb15

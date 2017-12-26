@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_FOOTER;
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_HEADER;
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL;
-import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_TAGS;
+import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_ONE;
 
 
 public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -23,6 +23,10 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
 
     void setOnItemClickListener(OnItemClickListener li) {
         mListener = li;
+    }
+
+    public ArrayList<BaseItem> getData() {
+        return mDatas;
     }
 
     /**
@@ -85,21 +89,13 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         if (mHeaderView == null) {
             if (mFooterView == null) {
                 //headerView footerView 都为空时
-                if (mDatas.get(position).getItemType() == TYPE_NORMAL) { //有头部视图时需要对位置进行纠正
-                    return TYPE_NORMAL.getiNum();
-                } else if (mDatas.get(position).getItemType() == TYPE_TAGS) {
-                    return TYPE_TAGS.getiNum();
-                }
+                return mDatas.get(position).getItemType().getiNum();
             } else {
                 //headerView 为空 footerView 不为空时
                 if (position == mDatas.size()) {
                     return TYPE_FOOTER.getiNum();
                 } else {
-                    if (mDatas.get(position).getItemType() == TYPE_NORMAL) { //有头部视图时需要对位置进行纠正
-                        return TYPE_NORMAL.getiNum();
-                    } else if (mDatas.get(position).getItemType() == TYPE_TAGS) {
-                        return TYPE_TAGS.getiNum();
-                    }
+                    return mDatas.get(position).getItemType().getiNum();
                 }
             }
         } else {
@@ -108,11 +104,7 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
                 if (position == 0) {
                     return TYPE_HEADER.getiNum();
                 } else {
-                    if (mDatas.get(position - 1).getItemType() == TYPE_NORMAL) { //有头部视图时需要对位置进行纠正
-                        return TYPE_NORMAL.getiNum();
-                    } else if (mDatas.get(position - 1).getItemType() == TYPE_TAGS) {
-                        return TYPE_TAGS.getiNum();
-                    }
+                    return mDatas.get(position - 1).getItemType().getiNum();
                 }
             } else {
                 //headerView 不为空 footerView 也不为空时
@@ -121,33 +113,8 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
                 } else if (position == mDatas.size() + 1) {
                     return TYPE_FOOTER.getiNum();
                 } else {
-                    if (mDatas.get(position - 1).getItemType() == TYPE_NORMAL) { //有头部和底部视图时需要对位置进行纠正
-                        return TYPE_NORMAL.getiNum();
-                    } else if (mDatas.get(position - 1).getItemType() == TYPE_TAGS) {
-                        return TYPE_TAGS.getiNum();
-                    }
+                    return mDatas.get(position - 1).getItemType().getiNum();
                 }
-            }
-        }
-        if (mHeaderView != null) { //包含头部控件时
-            if (position == 0) {
-                return TYPE_HEADER.getiNum(); //返回HEADER对应的数值
-            } else {
-                if (mDatas.get(position - 1).getItemType() == TYPE_NORMAL) { //有头部视图时需要对位置进行纠正
-                    return TYPE_NORMAL.getiNum();
-                } else if (mDatas.get(position - 1).getItemType() == TYPE_TAGS) {
-                    return TYPE_TAGS.getiNum();
-                } else {
-                    return TYPE_FOOTER.getiNum();
-                }
-            }
-        } else { //不包含头部控件时
-            if (mDatas.get(position).getItemType() == TYPE_NORMAL) { //有头部视图时需要对位置进行纠正
-                return TYPE_NORMAL.getiNum();
-            } else if (mDatas.get(position).getItemType() == TYPE_TAGS) {
-                return TYPE_TAGS.getiNum();
-            } else {
-                return TYPE_FOOTER.getiNum();
             }
         }
     }
@@ -163,10 +130,12 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-        if (getItemViewType(position) == TYPE_HEADER.getiNum())
+        if (getItemViewType(position) == TYPE_HEADER.getiNum()) {
             return;
-        if (getItemViewType(position) == TYPE_FOOTER.getiNum())
+        }
+        if (getItemViewType(position) == TYPE_FOOTER.getiNum()) {
             return;
+        }
         final int pos = getRealPosition(viewHolder);
         final BaseItem data = mDatas.get(pos);
         onBind(viewHolder, pos, data);
@@ -193,7 +162,7 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
                 public int getSpanSize(int position) {
                     return (getItemViewType(position) == TYPE_HEADER.getiNum() ||
                             getItemViewType(position) == TYPE_FOOTER.getiNum() ||
-                            getItemViewType(position) == TYPE_TAGS.getiNum())
+                            getItemViewType(position) == TYPE_ONE.getiNum())
                             ? gridManager.getSpanCount() : 1;
                 }
             });
@@ -205,7 +174,7 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         super.onViewAttachedToWindow(holder);
         if ((holder.getItemViewType() == TYPE_HEADER.getiNum()) ||
                 (holder.getItemViewType() == TYPE_FOOTER.getiNum()) ||
-                (holder.getItemViewType() == TYPE_TAGS.getiNum())) {
+                (holder.getItemViewType() == TYPE_ONE.getiNum())) {
             ViewGroup.LayoutParams lp = holder.itemView.getLayoutParams();
             if (lp != null && lp instanceof StaggeredGridLayoutManager.LayoutParams) {
                 StaggeredGridLayoutManager.LayoutParams p = (StaggeredGridLayoutManager.LayoutParams) lp;
@@ -265,7 +234,7 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
      */
     public enum RecyclerItemType {
         //正常Item，头部视图，底部视图，标签视图
-        TYPE_NORMAL(0), TYPE_HEADER(1), TYPE_FOOTER(2), TYPE_TAGS(3);
+        TYPE_NORMAL(0), TYPE_HEADER(1), TYPE_FOOTER(2), TYPE_ONE(3), TYPE_THREE(4);
 
         private int iNum = 0;
 

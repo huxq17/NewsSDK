@@ -7,12 +7,15 @@ import com.aiqing.newssdk.base.ImpBaseView;
 import com.aiqing.newssdk.config.Constants;
 import com.aiqing.newssdk.disklrucache.DiskCacheManager;
 import com.aiqing.newssdk.utils.LogWritter;
+import com.aiyou.toolkit.common.LogUtils;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
+import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
@@ -29,98 +32,98 @@ import io.reactivex.schedulers.Schedulers;
 class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter {
 
     private NewsContract.View mNewsListFrag;
-    private int currentIndex;
+    private long timeStamp;
 
     @Override
     public void refreshNews() {
         mNewsListFrag.showRefreshBar();
-        currentIndex = 0;
+        timeStamp = 0;
         final Category category = mNewsListFrag.getCategory();
-        if(category!=null){
+        if (category != null) {
             ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString())
-                    .map(new Function<SDKNewsList, ArrayList<NewsBean>>() {
+                    .map(new Function<SDKNewsList, List<SDKNewsList.DataBean>>() {
 
                         @Override
-                        public ArrayList<NewsBean> apply(SDKNewsList topNewsList) throws Exception {
+                        public List<SDKNewsList.DataBean> apply(SDKNewsList topNewsList) throws Exception {
+                            int rc = topNewsList.getRc();
+                            String msg = topNewsList.getMsg();
+                            int count = topNewsList.getCount();
+                            List<SDKNewsList.DataBean> datas = topNewsList.getData();
 
-                            return null;
+                            LogUtils.e("rc=" + rc + ";msg=" + msg + ";count=" + count);
+                            return datas;
                         }
                     })
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe();
+                    .flatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
+                        @Override
+                        public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
+                            return  Observable.fromIterable(dataBeans);
+                        }
+                    })
+                    .map(new Function<SDKNewsList.DataBean, BaseItem>() {
+                        @Override
+                        public BaseItem apply(SDKNewsList.DataBean newsBean) throws Exception {
+                            BaseItem<SDKNewsList.DataBean> baseItem = new BaseItem<>();
+                            boolean hasImage = newsBean.isHas_image();
+                            if (!hasImage) {
+                                baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL);
+                            } else {
+                                SDKNewsList.DataBean.MiddleImageBean middleImageBean = newsBean.getMiddle_image();
+                                List<NewsBean> list = middleImageBean.getUrl_list();
+                                if (list.size() == 1) {
+                                    baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_ONE);
+                                } else if (list.size() == 3) {
+                                    baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_THREE);
+                                } else {
+                                    baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL);
+                                }
+                            }
+                            baseItem.setData(newsBean);
+                            return baseItem;
+                        }
+                    })
+                    .toList()
+                    .map(new Function<List<BaseItem>, ArrayList<BaseItem>>() {
+                        @Override
+                        public ArrayList<BaseItem> apply(List<BaseItem> baseItems) {
+                            ArrayList<BaseItem> items = new ArrayList<>();
+                            items.addAll(baseItems);
+                            return items;
+                        }
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new SingleObserver<ArrayList<BaseItem>>() {
+
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                            addDisposable(d);
+                        }
+
+                        @Override
+                        public void onSuccess(ArrayList<BaseItem> value) {
+                            DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
+                            manager.put(Constants.CACHE_HEADLINE_NEWS, value);
+//                            timeStamp += 20;
+                            mNewsListFrag.hideRefreshBar();
+                            mNewsListFrag.refreshNewsSuccessed(value);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            LogWritter.LogStr(e.getMessage() + "------------->errMsg");
+                            mNewsListFrag.hideRefreshBar();
+                            mNewsListFrag.refreshNewsFail(e.getMessage());
+                        }
+                    });
         }
-        ApiManager.getInstence().getTopNewsServie()
-                .getTopNews(currentIndex + "")
-                .map(new Function<TopNewsList, ArrayList<NewsBean>>() {
-                    @Override
-                    public ArrayList<NewsBean> apply(TopNewsList topNewsList) {
-                        return topNewsList.getTopNewsArrayList();
-                    }
-                })
-                .flatMap(new Function<ArrayList<NewsBean>, Observable<NewsBean>>() {
-                    @Override
-                    public Observable<NewsBean> apply(ArrayList<NewsBean> topNewses) throws Exception {
-                        return Observable.fromIterable(topNewses);
-                    }
-                })
-                .filter(new Predicate<NewsBean>() {
-                    @Override
-                    public boolean test(NewsBean topNews) throws Exception {
-                        return topNews.getUrl() != null;
-                    }
-                })
-                .map(new Function<NewsBean, BaseItem>() {
-                    @Override
-                    public BaseItem apply(NewsBean topNews) {
-                        BaseItem<NewsBean> baseItem = new BaseItem<>();
-                        baseItem.setData(topNews);
-                        return baseItem;
-                    }
-                })
-                .toList()
-                //将 List 转为ArrayList 缓存存储 ArrayList Serializable对象
-                .map(new Function<List<BaseItem>, ArrayList<BaseItem>>() {
-                    @Override
-                    public ArrayList<BaseItem> apply(List<BaseItem> baseItems) {
-                        ArrayList<BaseItem> items = new ArrayList<>();
-                        items.addAll(baseItems);
-                        return items;
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new SingleObserver<ArrayList<BaseItem>>() {
-
-                    @Override
-                    public void onSubscribe(Disposable d) {
-                        addDisposable(d);
-                    }
-
-                    @Override
-                    public void onSuccess(ArrayList<BaseItem> value) {
-                        DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
-                        manager.put(Constants.CACHE_HEADLINE_NEWS, value);
-                        currentIndex += 20;
-                        mNewsListFrag.hideRefreshBar();
-                        mNewsListFrag.refreshNewsSuccessed(value);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        LogWritter.LogStr(e.getMessage() + "------------->errMsg");
-                        mNewsListFrag.hideRefreshBar();
-                        mNewsListFrag.refreshNewsFail(e.getMessage());
-                    }
-
-                });
     }
 
     //两个方法没区别,只是刷新会重新赋值
     @Override
     public void loadMore() {
         ApiManager.getInstence().getTopNewsServie()
-                .getTopNews(currentIndex + "")
+                .getTopNews(timeStamp + "")
                 .map(new Function<TopNewsList, ArrayList<NewsBean>>() {
                     @Override
                     public ArrayList<NewsBean> apply(TopNewsList topNewsList) {
@@ -160,7 +163,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                     public void onSuccess(List<BaseItem> value) {
                         if (value != null && value.size() > 0) {
                             //每刷新成功一次多加载20条
-                            currentIndex += 20;
+                            timeStamp += 20;
                             mNewsListFrag.loadMoreSuccessed((ArrayList<BaseItem>) value);
                         } else {
                             mNewsListFrag.loadAll();
@@ -186,6 +189,8 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         ArrayList<BaseItem> topNews = manager.getSerializable(Constants.CACHE_HEADLINE_NEWS);
         if (topNews != null) {
             mNewsListFrag.refreshNewsSuccessed(topNews);
+        } else {
+            refreshNews();
         }
     }
 

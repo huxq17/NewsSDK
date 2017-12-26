@@ -1,1 +1,1 @@
-include ':app', ':pandaqlib'
+include ':app', ':pandaqlib', ':toolkit'

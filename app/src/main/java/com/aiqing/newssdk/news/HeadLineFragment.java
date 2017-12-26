@@ -14,6 +14,7 @@ import com.aiqing.newssdk.R;
 import com.aiqing.newssdk.base.BaseFragment;
 import com.aiqing.newssdk.rxbus.RxBus;
 import com.aiqing.newssdk.rxbus.RxConstants;
+import com.aiyou.toolkit.common.LogUtils;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 import com.pandaq.pandaqlib.magicrecyclerView.MagicRecyclerView;
@@ -172,6 +173,7 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
         } else {
             mAdapter.setBaseDatas(topNews);
         }
+        LogUtils.e(" mAdapter.getData().size()="+ mAdapter.getData().size());
         mNewsRecycler.showFooter();
     }
 

@@ -16,7 +16,6 @@ import com.pandaq.pandaqlib.R;
 
 import java.util.ArrayList;
 
-import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_TAGS;
 
 /**
  * Created by PandaQ on 2016/9/18.
@@ -144,18 +143,18 @@ public class MagicRecyclerView extends RecyclerView {
         }
         int firstItemType = getAdapter().getItemViewType(firstVisibleItemPosition);
         // 如果是未添加过的 Tag 则加入到 ArrayList 中
-        if (firstItemType == TYPE_TAGS.getiNum() && !tags.contains(mRecyclerAdapter.getTag(firstVisibleItemPosition))) {
+        if (false) {
             tags.add(mRecyclerAdapter.getTag(firstVisibleItemPosition));
         }
         if (mOnTagChangeListener != null) {
             if (dy > 0) { //向上滑动，滑到Tag时触发
-                if (firstItemType == TYPE_TAGS.getiNum()) { //上滑到 Item 变 Tag 时触发
+                if (false) { //上滑到 Item 变 Tag 时触发
                     currentTag = mRecyclerAdapter.getTag(firstVisibleItemPosition);
                     mOnTagChangeListener.onChange(currentTag);
                 }
             } else {
                 int lastItemType = getAdapter().getItemViewType(firstVisibleItemPosition + 1);
-                if (firstItemType != TYPE_TAGS.getiNum() && lastItemType == TYPE_TAGS.getiNum()) { //下滑到 Tag 上边沿时触发
+                if (false) { //下滑到 Tag 上边沿时触发
                     if (tags.size() == 0) {
                         return;
                     }
