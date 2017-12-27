@@ -173,7 +173,6 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
         } else {
             mAdapter.setBaseDatas(topNews);
         }
-        LogUtils.e(" mAdapter.getData().size()="+ mAdapter.getData().size());
         mNewsRecycler.showFooter();
     }
 

@@ -1,6 +1,9 @@
 package com.aiqing.newssdk.news;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.RecyclerView;
@@ -15,12 +18,17 @@ import com.aiqing.newssdk.R;
 import com.aiqing.newssdk.view.NewsItemView;
 import com.aiqing.newssdk.view.NewsOneItemView;
 import com.aiqing.newssdk.view.NewsThreeItemView;
+import com.aiyou.toolkit.common.DensityUtil;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NewsListAdapter extends BaseRecyclerAdapter {
 
@@ -72,47 +80,66 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
     public void onBind(RecyclerView.ViewHolder holder, int RealPosition, BaseItem data) {
         if (holder instanceof BaseVH) {
             BaseVH vh = (BaseVH) holder;
-            vh.bind(data);
+            vh.bind(RealPosition, data);
         }
     }
 
     static abstract class BaseVH<T> extends RecyclerView.ViewHolder {
         protected int widthPx;
         protected int heighPx;
+        protected final Map<Object, Target> targetMap = new HashMap<>();
+        protected Context mContext;
 
         public BaseVH(View itemView) {
             super(itemView);
             float width = itemView.getResources().getDimension(R.dimen.news_image_width);
             widthPx = (int) width;
             heighPx = widthPx * 3 / 4;
+            mContext = itemView.getContext();
         }
 
-        public abstract void bind(T data);
+        public void enqueue(String url, Object key, Target target) {
+            if (target != null && targetMap.get(key) != target) {
+                Picasso.with(mContext).cancelRequest(target);
+                targetMap.put(target, target);
+            }
+            int width = DensityUtil.dip2px(mContext, 30);
+            int height = DensityUtil.dip2px(mContext, 25);
+            Picasso.with(mContext)
+                    .load(url)
+                    .resize(width, height)
+                    .into(target);
+        }
+
+        public abstract void bind(int position, T data);
     }
 
     static class ViewHolder extends BaseVH<BaseItem> {
-        ImageView mNewsImage;
         TextView mNewsTitle;
         TextView mSource;
 
         ViewHolder(View view) {
             super(view);
-            mNewsImage = (ImageView) view.findViewById(R.id.news_image);
             mNewsTitle = (TextView) view.findViewById(R.id.news_title);
             mSource = (TextView) view.findViewById(R.id.source);
         }
 
         @Override
-        public void bind(BaseItem data) {
+        public void bind(int position, BaseItem data) {
             SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
-            String image = null;//避免null引起Picasso崩溃
-            if (!TextUtils.isEmpty(image)) {
-                Picasso.with(mNewsTitle.getContext())
-                        .load(image)
-                        .resize(widthPx, heighPx)
-                        .into(mNewsImage);
+            final String avatar = topNews.getMedia_avatar_url();
+            if (!TextUtils.isEmpty(avatar)) {
+                enqueue(avatar, mSource, new DrawableCallBack(mContext, avatar) {
+                    public void onDrawableLoaded(Drawable drawable, String url) {
+//                      drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+//                      mNewsTitle.setCompoundDrawables(drawable,null,null,null);
+                        mSource.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+                    }
+                });
+            } else {
+                mSource.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             }
         }
     }
@@ -130,44 +157,85 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
         }
 
         @Override
-        public void bind(BaseItem data) {
+        public void bind(int position, BaseItem data) {
             SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
-            String image = null;//避免null引起Picasso崩溃
-            if (!TextUtils.isEmpty(image)) {
-                Picasso.with(mNewsTitle.getContext())
-                        .load(image)
-                        .resize(widthPx, heighPx)
-                        .into(mNewsImage);
+            final String avatar = topNews.getMedia_avatar_url();
+            if (!TextUtils.isEmpty(avatar)) {
+                enqueue(avatar, mSource, new DrawableCallBack(mContext, avatar) {
+                    public void onDrawableLoaded(Drawable drawable, String url) {
+//                      drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+//                      mNewsTitle.setCompoundDrawables(drawable,null,null,null);
+                        mSource.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+                    }
+                });
+            } else {
+                mSource.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             }
         }
     }
 
     static class ThreeViewHolder extends BaseVH<BaseItem> {
-        ImageView mNewsImage;
         TextView mNewsTitle;
         TextView mSource;
+        RecyclerView mGridImages;
 
         ThreeViewHolder(View view) {
             super(view);
-            mNewsImage = (ImageView) view.findViewById(R.id.news_image);
             mNewsTitle = (TextView) view.findViewById(R.id.news_title);
             mSource = (TextView) view.findViewById(R.id.source);
+            mGridImages = view.findViewById(R.id.news_grid_images);
         }
 
         @Override
-        public void bind(BaseItem data) {
+        public void bind(int position, BaseItem data) {
             SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
-            String image = null;//避免null引起Picasso崩溃
-            if (!TextUtils.isEmpty(image)) {
-                Picasso.with(mNewsTitle.getContext())
-                        .load(image)
-                        .resize(widthPx, heighPx)
-                        .into(mNewsImage);
+            final String avatar = topNews.getMedia_avatar_url();
+            if (!TextUtils.isEmpty(avatar)) {
+                enqueue(avatar, mSource, new DrawableCallBack(mContext, avatar) {
+                    public void onDrawableLoaded(Drawable drawable, String url) {
+//                      drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+//                      mNewsTitle.setCompoundDrawables(drawable,null,null,null);
+                        mSource.setCompoundDrawablesWithIntrinsicBounds(drawable, null, null, null);
+                    }
+                });
+            } else {
+                mSource.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             }
+            NewsThreeItemView.ImageAdapter adapter = (NewsThreeItemView.ImageAdapter) mGridImages.getAdapter();
+            List<NewsBean> urls = topNews.getMiddle_image().getUrl_list();
+            adapter.setData(urls);
+//            mGridImages.setAdapter(adapter);
+        }
+    }
+
+    public static abstract class DrawableCallBack implements Target {
+        Context context;
+        String url;
+
+        public DrawableCallBack(Context context, String url) {
+            this.context = context;
+            this.url = url;
+        }
+
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            onDrawableLoaded(new BitmapDrawable(context.getResources(), bitmap), url);
+        }
+
+        abstract void onDrawableLoaded(Drawable drawable, String url);
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
         }
     }
 }

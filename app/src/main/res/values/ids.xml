@@ -4,4 +4,5 @@
     <item name="news_image" type="id" />
     <item name="news_title" type="id" />
     <item name="source" type="id" />
+    <item name="news_grid_images" type="id" />
 </resources>

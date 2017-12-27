@@ -2,15 +2,15 @@ package com.aiqing.newssdk.view;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.v7.widget.CardView;
 import android.util.TypedValue;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
 
-public class NewsOneItemView extends CardView {
+public class NewsOneItemView extends FrameLayout {
 
     public NewsOneItemView(Context context) {
         super(context);

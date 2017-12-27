@@ -29,6 +29,8 @@ import android.os.Build;
 import android.os.SystemClock;
 import android.widget.ImageView;
 
+import com.aiyou.toolkit.common.LogUtils;
+
 import static android.graphics.Color.WHITE;
 import static com.aiyou.toolkit.picasso.Picasso.LoadedFrom.MEMORY;
 
@@ -49,6 +51,7 @@ final class PicassoDrawable extends BitmapDrawable {
     }
     PicassoDrawable drawable =
         new PicassoDrawable(context, bitmap, placeholder, loadedFrom, noFade, debugging);
+    LogUtils.e("drawable width="+drawable.getIntrinsicWidth()+";height="+drawable.getIntrinsicHeight());
     target.setImageDrawable(drawable);
   }
 

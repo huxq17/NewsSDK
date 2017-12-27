@@ -2,15 +2,16 @@ package com.aiqing.newssdk.view;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.v7.widget.CardView;
 import android.util.TypedValue;
-import android.widget.ImageView;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
+import com.aiyou.toolkit.common.DensityUtil;
 
-public class NewsItemView extends CardView {
+public class NewsItemView extends FrameLayout {
 
     public NewsItemView(Context context) {
         super(context);
@@ -25,18 +26,10 @@ public class NewsItemView extends CardView {
         RelativeLayout relativeLayout = new RelativeLayout(context);
         relativeLayout.setBackgroundColor(getColor(R.color.transparent_00ffffff));
         addView(relativeLayout, relativeLp);
-
-        RelativeLayout.LayoutParams newsImagelp = new RelativeLayout.LayoutParams(getDimen(R.dimen.news_image_width), getDimen(R.dimen.news_image_height));
         int margin = getDimen(R.dimen.margin_8dp);
-        newsImagelp.setMargins(margin, margin, margin, margin);
-        ImageView newsImage = new ImageView(context);
-        newsImage.setId(R.id.news_image);
-        newsImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        relativeLayout.addView(newsImage, newsImagelp);
 
         RelativeLayout.LayoutParams textImagelp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         textImagelp.setMargins(margin, margin, margin, 0);
-        textImagelp.addRule(RelativeLayout.RIGHT_OF, R.id.news_image);
         TextView newsText = new TextView(context);
         newsText.setId(R.id.news_title);
         newsText.setTextColor(getColor(R.color.black_000000));
@@ -45,10 +38,13 @@ public class NewsItemView extends CardView {
 
         RelativeLayout.LayoutParams sourcelp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         sourcelp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-        sourcelp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+//        sourcelp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        sourcelp.addRule(RelativeLayout.BELOW, R.id.news_title);
         sourcelp.setMargins(margin, margin, margin, margin);
         TextView sourceText = new TextView(context);
+        sourceText.setGravity(Gravity.CENTER_VERTICAL);
         sourceText.setId(R.id.source);
+        sourceText.setCompoundDrawablePadding(DensityUtil.dip2px(context, 10));
         relativeLayout.addView(sourceText, sourcelp);
 
     }
