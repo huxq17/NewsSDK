@@ -4,12 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-/**
- * Created by PandaQ on 2016/9/20.
- * email : 767807368@qq.com
- * 网易头条新闻实体类,不同类型的新闻知识外层json key不同，内部结构都为此类
- */
-
 public class NewsBean implements Serializable {
     /**
      * docid

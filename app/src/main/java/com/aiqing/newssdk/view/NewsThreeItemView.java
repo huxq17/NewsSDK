@@ -1,6 +1,7 @@
 package com.aiqing.newssdk.view;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -14,8 +15,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
+import com.aiqing.newssdk.decoration.SpaceItemDecoration;
 import com.aiqing.newssdk.news.NewsBean;
-import com.aiyou.toolkit.common.DensityUtil;
+import com.aiqing.newssdk.utils.NewsTimeDrawer;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import java.util.List;
 
 public class NewsThreeItemView extends FrameLayout {
     private RecyclerView mGridImages;
+    int margin;
+    private NewsTimeDrawer drawer;
 
     public NewsThreeItemView(Context context) {
         super(context);
@@ -33,12 +37,12 @@ public class NewsThreeItemView extends FrameLayout {
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 //            setForeground(context.getResources().getDrawable(R.drawable.ripple_item));
 //        }
+        margin = getDimen(R.dimen.margin_8dp);
         LayoutParams relativeLp = new LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         RelativeLayout relativeLayout = new RelativeLayout(context);
+        relativeLayout.setPadding(0, margin, margin, margin);
         relativeLayout.setBackgroundColor(getColor(R.color.transparent_00ffffff));
         addView(relativeLayout, relativeLp);
-
-        int margin = getDimen(R.dimen.margin_8dp);
 
         RelativeLayout.LayoutParams textImagelp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         textImagelp.setMargins(margin, margin, margin, margin);
@@ -49,12 +53,16 @@ public class NewsThreeItemView extends FrameLayout {
         relativeLayout.addView(newsText, textImagelp);
 
         mGridImages = new RecyclerView(context);
+        mGridImages.setFocusableInTouchMode(false);
+        mGridImages.setFocusable(false);
+        mGridImages.addItemDecoration(new SpaceItemDecoration(margin));
         GridLayoutManager mLayoutManager = new GridLayoutManager(context, 3);
         mGridImages.setLayoutManager(mLayoutManager);
         mGridImages.setHasFixedSize(true);
         mGridImages.setId(R.id.news_grid_images);
         RelativeLayout.LayoutParams imagesImagelp = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         imagesImagelp.addRule(RelativeLayout.BELOW, R.id.news_title);
+        imagesImagelp.setMargins(0, 0, 0, 0);
         relativeLayout.addView(mGridImages, imagesImagelp);
         ImageAdapter adapter = new ImageAdapter();
         mGridImages.setAdapter(adapter);
@@ -63,13 +71,13 @@ public class NewsThreeItemView extends FrameLayout {
         sourcelp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 //        sourcelp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         sourcelp.addRule(RelativeLayout.BELOW, R.id.news_grid_images);
-        sourcelp.setMargins(margin, margin, margin, margin);
-        TextView sourceText = new TextView(context);
+        sourcelp.setMargins(margin, margin, margin, 0);
+        sourceText = new TextView(context);
         sourceText.setGravity(Gravity.CENTER_VERTICAL);
         sourceText.setId(R.id.source);
-        sourceText.setCompoundDrawablePadding(DensityUtil.dip2px(context, 10));
+        sourceText.setCompoundDrawablePadding(margin);
         relativeLayout.addView(sourceText, sourcelp);
-
+        drawer = new NewsTimeDrawer(sourceText.getPaint());
     }
 
     private int getDimen(int id) {
@@ -99,15 +107,13 @@ public class NewsThreeItemView extends FrameLayout {
             notifyDataSetChanged();
         }
 
-        //创建新View，被LayoutManager所调用
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-            ImageView view = new ImageView(viewGroup.getContext());
+            NewsImageView view = new NewsImageView(viewGroup.getContext());
             ViewHolder vh = new ViewHolder(view);
             return vh;
         }
 
-        //将数据与界面进行绑定的操作
         @Override
         public void onBindViewHolder(ViewHolder viewHolder, int position) {
             ImageView imageView = (ImageView) viewHolder.itemView;
@@ -118,7 +124,6 @@ public class NewsThreeItemView extends FrameLayout {
             }
         }
 
-        //获取数据的数量
         @Override
         public int getItemCount() {
             return datas.size();
@@ -132,4 +137,19 @@ public class NewsThreeItemView extends FrameLayout {
         }
     }
 
+    private TextView sourceText;
+    private String time;
+
+    public void setTime(String time) {
+        this.time = time;
+        invalidate();
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        int sourceWidth = sourceText.getWidth();
+        int sourceHeight = sourceText.getHeight();
+        drawer.draw(time, sourceWidth + margin + margin, getHeight()-margin-sourceHeight/2, canvas);
+    }
 }

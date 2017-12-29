@@ -1,11 +1,14 @@
 package com.aiqing.newssdk.news;
 
+import android.text.TextUtils;
+
 import com.aiqing.newssdk.CustomApplication;
 import com.aiqing.newssdk.api.ApiManager;
 import com.aiqing.newssdk.base.BasePresenter;
 import com.aiqing.newssdk.base.ImpBaseView;
 import com.aiqing.newssdk.config.Constants;
 import com.aiqing.newssdk.disklrucache.DiskCacheManager;
+import com.aiqing.newssdk.news.details.NewsDetailsActivity;
 import com.aiqing.newssdk.utils.LogWritter;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
@@ -14,10 +17,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -29,14 +35,14 @@ import io.reactivex.schedulers.Schedulers;
 
 class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter {
 
-    private NewsContract.View mNewsListFrag;
+    private NewsContract.View mView;
     private long timeStamp;
 
     @Override
     public void refreshNews() {
-        mNewsListFrag.showRefreshBar();
+        mView.showRefreshBar();
         timeStamp = 0;
-        final Category category = mNewsListFrag.getCategory();
+        final Category category = mView.getCategory();
         if (category != null) {
             ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString())
                     .map(new Function<SDKNewsList, List<SDKNewsList.DataBean>>() {
@@ -51,7 +57,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                             return datas;
                         }
                     })
-                    .flatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
+                    .concatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
                         @Override
                         public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
                             return Observable.fromIterable(dataBeans);
@@ -100,26 +106,77 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                         @Override
                         public void onSuccess(ArrayList<BaseItem> value) {
                             DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
-                            manager.put(Constants.CACHE_HEADLINE_NEWS, value);
+                            manager.put(mView.getCacheKey(), value);
 //                            timeStamp += 20;
-                            mNewsListFrag.hideRefreshBar();
-                            mNewsListFrag.refreshNewsSuccessed(value);
+                            mView.hideRefreshBar();
+                            mView.refreshNewsSuccessed(value);
                         }
 
                         @Override
                         public void onError(Throwable e) {
                             LogWritter.LogStr(e.getMessage() + "------------->errMsg");
-                            mNewsListFrag.hideRefreshBar();
-                            mNewsListFrag.refreshNewsFail(e.getMessage());
+                            mView.hideRefreshBar();
+                            mView.refreshNewsFail(e.getMessage());
                         }
                     });
         }
     }
 
+
+    public void viewNewsDetails(final SDKNewsList.DataBean dataBean) {
+        Observable.create(new ObservableOnSubscribe<SDKNewsList.DataBean>() {
+            @Override
+            public void subscribe(ObservableEmitter<SDKNewsList.DataBean> e) throws Exception {
+                e.onNext(dataBean);
+            }
+        })
+                .map(new Function<SDKNewsList.DataBean, String>() {
+                    @Override
+                    public String apply(SDKNewsList.DataBean dataBean) throws Exception {
+                        return dataBean.getUrl();
+                    }
+                })
+                .flatMap(new Function<String, ObservableSource<NewsHtmlBean>>() {
+                    @Override
+                    public ObservableSource<NewsHtmlBean> apply(String s) throws Exception {
+                        return ApiManager.getInstence().getSDKNewsList().getHtml(s);
+                    }
+                })
+                .map(new Function<NewsHtmlBean, String>() {
+                    @Override
+                    public String apply(NewsHtmlBean newsHtmlBean) throws Exception {
+                        List<NewsHtmlBean.DataBean> datas = newsHtmlBean.getData();
+                        if (datas != null && datas.size() > 0) {
+                            NewsHtmlBean.DataBean dataBean = datas.get(0);
+                            if (dataBean != null) {
+                                String html = dataBean.getContent();
+                                String url = dataBean.getUrl();
+                                if (!TextUtils.isEmpty(html)) {
+                                    return html;
+                                } else {
+                                    return url;
+                                }
+                            }
+                        }
+                        return "";
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(String content) throws Exception {
+                        if (TextUtils.isEmpty(content)) return;
+                        NewsDetailsActivity.start(mView.getContext(), content);
+                    }
+                })
+        ;
+    }
+
     //两个方法没区别,只是刷新会重新赋值
     @Override
     public void loadMore() {
-        final Category category = mNewsListFrag.getCategory();
+        final Category category = mView.getCategory();
         if (category != null) {
             ApiManager.getInstence().getSDKNewsList().getMore(category.toString(), timeStamp)
                     .map(new Function<SDKNewsList, List<SDKNewsList.DataBean>>() {
@@ -131,7 +188,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                             return datas;
                         }
                     })
-                    .flatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
+                    .concatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
                         @Override
                         public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
                             return Observable.fromIterable(dataBeans);
@@ -179,19 +236,19 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
 
                         @Override
                         public void onSuccess(ArrayList<BaseItem> value) {
-                            DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
-                            manager.put(Constants.CACHE_HEADLINE_NEWS, value);
+//                            DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
+//                            manager.put(mView.getCacheKey(), value);
                             if (value != null && value.size() > 0) {
-                                mNewsListFrag.loadMoreSuccessed(value);
+                                mView.loadMoreSuccess(value);
                             } else {
-                                mNewsListFrag.loadAll();
+                                mView.loadAll();
                             }
                         }
 
                         @Override
                         public void onError(Throwable e) {
                             LogWritter.LogStr(e.getMessage() + "------------->errMsg");
-                            mNewsListFrag.loadMoreFail(e.getMessage());
+                            mView.loadMoreFail(e.getMessage());
                         }
                     });
         }
@@ -203,17 +260,19 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
     @Override
     public void loadCache() {
         DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
-        ArrayList<BaseItem> topNews = manager.getSerializable(Constants.CACHE_HEADLINE_NEWS);
+        ArrayList<BaseItem> topNews = manager.getSerializable(mView.getCacheKey());
         if (topNews != null) {
-            mNewsListFrag.refreshNewsSuccessed(topNews);
+            SDKNewsList.DataBean dataBean = (SDKNewsList.DataBean) topNews.get(topNews.size() - 1).getData();
+            timeStamp = dataBean.getPublish_time();
+            mView.refreshNewsSuccessed(topNews);
         } else {
+            refreshNews();
         }
-        refreshNews();
     }
 
     @Override
     public void bindView(ImpBaseView view) {
-        mNewsListFrag = (NewsContract.View) view;
+        mView = (NewsContract.View) view;
     }
 
     @Override
@@ -223,6 +282,6 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
 
     @Override
     public void onDestory() {
-        mNewsListFrag = null;
+        mView = null;
     }
 }

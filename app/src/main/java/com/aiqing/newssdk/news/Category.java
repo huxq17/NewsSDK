@@ -16,6 +16,17 @@ public enum Category {
         return Category.values().length;
     }
 
+    public static Category get(int index) {
+        int i=0;
+        for (Category category : Category.values()) {
+            if(index==i){
+                return category;
+            }
+            i++;
+        }
+        return null;
+    }
+
     public String toString() {
         return super.toString().toLowerCase();
     }

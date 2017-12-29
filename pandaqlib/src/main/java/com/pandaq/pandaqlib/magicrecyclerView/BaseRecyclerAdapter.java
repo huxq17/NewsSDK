@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_FOOTER;
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_HEADER;
-import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL;
 import static com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter.RecyclerItemType.TYPE_ONE;
 
 
@@ -139,7 +138,8 @@ public abstract class BaseRecyclerAdapter extends RecyclerView.Adapter<RecyclerV
         final int pos = getRealPosition(viewHolder);
         final BaseItem data = mDatas.get(pos);
         onBind(viewHolder, pos, data);
-        if (data.getItemType() == TYPE_NORMAL) { //普通的item才可以点击
+        RecyclerItemType type = data.getItemType();
+        if (type != TYPE_FOOTER &&type != TYPE_HEADER) { //普通的item才可以点击
             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

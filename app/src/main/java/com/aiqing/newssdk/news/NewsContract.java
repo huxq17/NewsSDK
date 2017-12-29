@@ -1,5 +1,7 @@
 package com.aiqing.newssdk.news;
 
+import android.content.Context;
+
 import com.aiqing.newssdk.base.ImpBasePresenter;
 import com.aiqing.newssdk.base.ImpBaseView;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
@@ -29,9 +31,13 @@ public interface NewsContract {
 
         void loadMoreFail(String errorMsg);
 
-        void loadMoreSuccessed(ArrayList<BaseItem> topNewses);
+        void loadMoreSuccess(ArrayList<BaseItem> topNewses);
 
         void loadAll();
+
+        String getCacheKey();
+
+        Context getContext();
     }
 
     interface Presenter extends ImpBasePresenter {
@@ -40,5 +46,7 @@ public interface NewsContract {
         void loadMore();
 
         void loadCache();
+
+        void viewNewsDetails(SDKNewsList.DataBean dataBean);
     }
 }

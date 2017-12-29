@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parentPanel"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/android_statusbar_height">
+
+    <com.aiyou.toolkit.common.IWebView
+        android:id="@+id/wv_news_details"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

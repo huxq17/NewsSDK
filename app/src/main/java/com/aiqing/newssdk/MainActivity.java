@@ -18,7 +18,6 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     private ArrayList<Fragment> mFragmentArrayList;
     ViewPager mVpNewsList;
     TabLayout mTlNewsTabs;
-    String TAG = "tag";
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -32,16 +31,6 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
         mTlNewsTabs = f(R.id.tl_news_tabs);
         initView();
     }
-
-    String[] newsTitle = new String[]{
-            "要闻",
-            "科技",
-            "体育",
-            "健康",
-            "轻松一刻",
-            "军事",
-            "旅游"
-    };
 
     private void initView() {
         mFragmentArrayList = new ArrayList<>();
@@ -61,7 +50,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
 
             @Override
             public CharSequence getPageTitle(int position) {
-                return newsTitle[position];
+                return Category.get(position).getTitle();
             }
         });
         mVpNewsList.addOnPageChangeListener(this);

@@ -51,16 +51,21 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
     }
 
     @Override
+    public String getCacheKey() {
+        LogUtils.e("getCacheKey key=" + mCategory.toString());
+        return mCategory.toString();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Bundle args = getArguments();
         if (args != null) {
             mCategory = (Category) args.getSerializable(KEY_CATEGORY);
         }
-
         View view = getActivity().getLayoutInflater().inflate(R.layout.headline_newslist_fragment, null, false);
-        mRefresh = (SwipeRefreshLayout) view.findViewById(R.id.refresh);
-        mEmptyMsg = (TextView) view.findViewById(R.id.empty_msg);
-        mNewsRecycler = (MagicRecyclerView) view.findViewById(R.id.newsRecycler);
+        mRefresh = view.findViewById(R.id.refresh);
+        mEmptyMsg = view.findViewById(R.id.empty_msg);
+        mNewsRecycler = view.findViewById(R.id.newsRecycler);
         bindPresenter();
 
         mLinearLayoutManager = new LinearLayoutManager(this.getContext());
@@ -190,7 +195,7 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
     }
 
     @Override
-    public void loadMoreSuccessed(ArrayList<BaseItem> topNewses) {
+    public void loadMoreSuccess(ArrayList<BaseItem> topNewses) {
         loading = false;
         mAdapter.addBaseDatas(topNewses);
     }
@@ -222,6 +227,8 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
 
     @Override
     public void onItemClick(int position, BaseItem data, View view) {
+        mPresenter.viewNewsDetails((SDKNewsList.DataBean) data.getData());
+
         //跳转到其他界面
 //        NewsBean topNews = (NewsBean) data.getData();
 //        Bundle bundle = new Bundle();

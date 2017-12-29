@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
+import com.aiqing.newssdk.utils.DateUtils;
 import com.aiqing.newssdk.view.NewsItemView;
 import com.aiqing.newssdk.view.NewsOneItemView;
 import com.aiqing.newssdk.view.NewsThreeItemView;
@@ -129,6 +130,9 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
             SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
+            long time  = topNews.getPublish_time();
+            NewsItemView threeItemView  = (NewsItemView) itemView;
+            threeItemView.setTime(DateUtils.convertTimeToFormat(time));
             final String avatar = topNews.getMedia_avatar_url();
             if (!TextUtils.isEmpty(avatar)) {
                 enqueue(avatar, mSource, new DrawableCallBack(mContext, avatar) {
@@ -173,6 +177,17 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
             } else {
                 mSource.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             }
+            long time  = topNews.getPublish_time();
+            NewsOneItemView threeItemView  = (NewsOneItemView) itemView;
+            threeItemView.setTime(DateUtils.convertTimeToFormat(time));
+            try {
+                String url = topNews.getMiddle_image().getUrl_list().get(0).getUrl();
+                if (!TextUtils.isEmpty(url)) {
+                    Picasso.with(mContext).load(url)
+                            .into(mNewsImage);
+                }
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -193,6 +208,9 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
             SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
+            long time  = topNews.getPublish_time();
+            NewsThreeItemView threeItemView  = (NewsThreeItemView) itemView;
+            threeItemView.setTime(DateUtils.convertTimeToFormat(time));
             final String avatar = topNews.getMedia_avatar_url();
             if (!TextUtils.isEmpty(avatar)) {
                 enqueue(avatar, mSource, new DrawableCallBack(mContext, avatar) {
