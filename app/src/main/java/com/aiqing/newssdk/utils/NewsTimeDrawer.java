@@ -23,9 +23,7 @@ public class NewsTimeDrawer {
             textHeight = (int) (fontMetrics.descent - fontMetrics.ascent);
             textWidth = (int) mTextPaint.measureText(text) + 1;
         }
-        if (tipsLayout == null) {
             tipsLayout = new StaticLayout(text, mTextPaint, textWidth, Layout.Alignment.ALIGN_NORMAL, 1.5f, 0f, false);
-        }
         top = top - textHeight / 2;
         canvas.save();
         canvas.translate(left, top);
