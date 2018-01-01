@@ -85,6 +85,6 @@ public class NewsItemView extends FrameLayout {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        drawer.draw(time, sourceText.getWidth() + margin + margin, getHeight()-margin-sourceText.getHeight()/2, canvas);
+        drawer.draw(time, sourceText.getWidth() + margin + margin, getHeight() - margin - sourceText.getHeight() / 2, canvas);
     }
 }

@@ -150,6 +150,6 @@ public class NewsThreeItemView extends FrameLayout {
         super.dispatchDraw(canvas);
         int sourceWidth = sourceText.getWidth();
         int sourceHeight = sourceText.getHeight();
-        drawer.draw(time, sourceWidth + margin + margin, getHeight()-margin-sourceHeight/2, canvas);
+        drawer.draw(time, sourceWidth + margin + margin, getHeight() - margin - sourceHeight / 2, canvas);
     }
 }
