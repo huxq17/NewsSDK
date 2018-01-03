@@ -25,6 +25,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -169,8 +170,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                         if (TextUtils.isEmpty(content)) return;
                         NewsDetailsActivity.start(mView.getContext(), content);
                     }
-                })
-        ;
+                });
     }
 
     //两个方法没区别,只是刷新会重新赋值
@@ -192,6 +192,12 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                         @Override
                         public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
                             return Observable.fromIterable(dataBeans);
+                        }
+                    })
+                    .skipWhile(new Predicate<SDKNewsList.DataBean>() {
+                        @Override
+                        public boolean test(SDKNewsList.DataBean dataBean) throws Exception {
+                            return false;
                         }
                     })
                     .map(new Function<SDKNewsList.DataBean, BaseItem>() {
@@ -251,6 +257,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                             mView.loadMoreFail(e.getMessage());
                         }
                     });
+
         }
     }
 

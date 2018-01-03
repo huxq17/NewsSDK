@@ -5,20 +5,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
-    android:orientation="vertical"
-    android:paddingTop="@dimen/android_statusbar_height">
+    android:orientation="vertical">
 
-    <android.support.design.widget.TabLayout
-        android:id="@+id/tl_news_tabs"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/colorPrimary"
-        android:elevation="@dimen/elevation_height"
-        android:outlineProvider="paddedBounds"
-        app:tabIndicatorColor="@color/table_indicator"
-        app:tabIndicatorHeight="4dp"
-        app:tabSelectedTextColor="@color/white_FFFFFF"
-        app:tabTextColor="@color/grey_text_5d5c5c" />
+        android:layout_height="@dimen/tablayout_height">
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/tl_news_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/tablayout_height"
+            android:background="@color/colorPrimary"
+            android:elevation="@dimen/elevation_height"
+            android:outlineProvider="paddedBounds"
+            app:tabIndicatorColor="@color/table_indicator"
+            app:tabIndicatorHeight="4dp"
+            app:tabSelectedTextColor="@color/white_FFFFFF"
+            app:tabTextAppearance="@style/TabLayoutTextStyle"
+            app:tabTextColor="@color/grey_text_5d5c5c" />
+
+        <ImageView
+            android:id="@+id/iv_expand_taglayout"
+            android:layout_width="@dimen/tablayout_height"
+            android:layout_height="match_parent"
+            android:layout_gravity="right" />
+    </FrameLayout>
 
     <android.support.v4.view.ViewPager
         android:id="@+id/vp_news_list"

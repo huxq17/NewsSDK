@@ -36,5 +36,6 @@
     <dimen name="comment_userimag_size">32dp</dimen>
     <dimen name="nav_item_height">48dp</dimen>
     <dimen name="android_statusbar_height">24dp</dimen>
+    <dimen name="tablayout_height">40dp</dimen>
 </resources>
 
