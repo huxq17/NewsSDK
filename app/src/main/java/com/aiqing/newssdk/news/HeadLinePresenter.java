@@ -123,54 +123,60 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         }
     }
 
+    private boolean requestViewDetails = false;
 
     public void viewNewsDetails(final SDKNewsList.DataBean dataBean) {
-        Observable.create(new ObservableOnSubscribe<SDKNewsList.DataBean>() {
-            @Override
-            public void subscribe(ObservableEmitter<SDKNewsList.DataBean> e) throws Exception {
-                e.onNext(dataBean);
-            }
-        })
-                .map(new Function<SDKNewsList.DataBean, String>() {
-                    @Override
-                    public String apply(SDKNewsList.DataBean dataBean) throws Exception {
-                        return dataBean.getUrl();
-                    }
-                })
-                .flatMap(new Function<String, ObservableSource<NewsHtmlBean>>() {
-                    @Override
-                    public ObservableSource<NewsHtmlBean> apply(String s) throws Exception {
-                        return ApiManager.getInstence().getSDKNewsList().getHtml(s);
-                    }
-                })
-                .map(new Function<NewsHtmlBean, String>() {
-                    @Override
-                    public String apply(NewsHtmlBean newsHtmlBean) throws Exception {
-                        List<NewsHtmlBean.DataBean> datas = newsHtmlBean.getData();
-                        if (datas != null && datas.size() > 0) {
-                            NewsHtmlBean.DataBean dataBean = datas.get(0);
-                            if (dataBean != null) {
-                                String html = dataBean.getContent();
-                                String url = dataBean.getUrl();
-                                if (!TextUtils.isEmpty(html)) {
-                                    return html;
-                                } else {
-                                    return url;
+        if (!requestViewDetails) {
+            requestViewDetails = true;
+            Observable.create(new ObservableOnSubscribe<SDKNewsList.DataBean>() {
+                @Override
+                public void subscribe(ObservableEmitter<SDKNewsList.DataBean> e) throws Exception {
+                    e.onNext(dataBean);
+                }
+            })
+                    .map(new Function<SDKNewsList.DataBean, String>() {
+                        @Override
+                        public String apply(SDKNewsList.DataBean dataBean) throws Exception {
+                            return dataBean.getUrl();
+                        }
+                    })
+                    .flatMap(new Function<String, ObservableSource<NewsHtmlBean>>() {
+                        @Override
+                        public ObservableSource<NewsHtmlBean> apply(String s) throws Exception {
+                            return ApiManager.getInstence().getSDKNewsList().getHtml(s);
+                        }
+                    })
+                    .map(new Function<NewsHtmlBean, String>() {
+                        @Override
+                        public String apply(NewsHtmlBean newsHtmlBean) throws Exception {
+                            List<NewsHtmlBean.DataBean> datas = newsHtmlBean.getData();
+                            if (datas != null && datas.size() > 0) {
+                                NewsHtmlBean.DataBean dataBean = datas.get(0);
+                                if (dataBean != null) {
+                                    String html = dataBean.getContent();
+                                    String url = dataBean.getUrl();
+                                    if (!TextUtils.isEmpty(html)) {
+                                        return html;
+                                    } else {
+                                        return url;
+                                    }
                                 }
                             }
+                            return "";
                         }
-                        return "";
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(String content) throws Exception {
-                        if (TextUtils.isEmpty(content)) return;
-                        NewsDetailsActivity.start(mView.getContext(), content);
-                    }
-                });
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Consumer<String>() {
+                        @Override
+                        public void accept(String content) throws Exception {
+                            if (TextUtils.isEmpty(content)) return;
+                            NewsDetailsActivity.start(mView.getContext(), content);
+                            requestViewDetails = false;
+                        }
+                    });
+        }
+
     }
 
     //两个方法没区别,只是刷新会重新赋值

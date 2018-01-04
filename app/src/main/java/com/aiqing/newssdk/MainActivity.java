@@ -6,17 +6,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatDelegate;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 
 import com.aiqing.newssdk.base.BaseActivity;
 import com.aiqing.newssdk.news.Category;
 import com.aiqing.newssdk.news.HeadLineFragment;
 import com.aiqing.newssdk.news.adapter.TagViewAdapter;
-import com.huxq17.handygridview.HandyGridView;
+import com.aiqing.newssdk.view.RotateImageView;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +26,8 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     private ArrayList<Fragment> mFragmentArrayList;
     ViewPager mVpNewsList;
     TabLayout mTlNewsTabs;
-    private ImageView ivExpand;
+    private RotateImageView ivExpand;
+    private TagManager tagManager;
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -77,6 +75,14 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
         mTlNewsTabs.setupWithViewPager(mVpNewsList);
         mTlNewsTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
         ivExpand.setOnClickListener(this);
+        tagManager = new TagManager(this, new TagViewAdapter(this, Category.values()));
+        tagManager.setTagClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mVpNewsList.setCurrentItem(position);
+                tagManager.collapseTagLayout();
+            }
+        });
     }
 
 
@@ -103,59 +109,14 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     @Override
     public void onClick(View v) {
         if (v == ivExpand) {
-            expandTagLayout();
-        } else if (v == ivCollapse) {
-            collapseTagLayout();
+            tagManager.expandTagLayout();
         }
     }
 
-    private View tagLayout;
-    private ImageView ivCollapse;
-    private HandyGridView mTagGridView;
-    private TagViewAdapter adapter;
-
-    private void expandTagLayout() {
-        ViewGroup parent = f(android.R.id.content);
-        if (tagLayout == null) {
-            tagLayout = LayoutInflater.from(this).inflate(R.layout.tag_layout, parent, false);
-            ivCollapse = tagLayout.findViewById(R.id.iv_collapse_taglayout);
-            ivCollapse.setOnClickListener(this);
-            parent.addView(tagLayout);
-        } else {
-            parent.removeView(tagLayout);
-            parent.addView(tagLayout);
-        }
-        setupTagGridView();
-    }
-
-    private void setupTagGridView() {
-        if (mTagGridView == null) {
-            mTagGridView = tagLayout.findViewById(R.id.hgv_tag);
-            adapter = new TagViewAdapter(this, Category.values());
-            mTagGridView.setAdapter(adapter);
-            mTagGridView.setSelectorEnabled(true);
-            mTagGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    mVpNewsList.setCurrentItem(position);
-                    collapseTagLayout();
-                }
-            });
-        } else {
-            adapter.setData(Category.values());
-        }
-    }
-
-    private void collapseTagLayout() {
-        ViewGroup parent = f(android.R.id.content);
-        parent.removeView(tagLayout);
-    }
 
     @Override
     public void onBackPressed() {
-        if (tagLayout != null && tagLayout.getParent() != null) {
-            collapseTagLayout();
-        } else {
+        if (!BackManager.INSTANCE.back()) {
             super.onBackPressed();
         }
     }

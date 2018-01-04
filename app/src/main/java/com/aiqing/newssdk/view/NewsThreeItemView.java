@@ -2,11 +2,13 @@ package com.aiqing.newssdk.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -55,6 +57,7 @@ public class NewsThreeItemView extends FrameLayout {
         mGridImages = new RecyclerView(context);
         mGridImages.setFocusableInTouchMode(false);
         mGridImages.setFocusable(false);
+//        mGridImages.setClickable(false);
         mGridImages.addItemDecoration(new SpaceItemDecoration(margin));
         GridLayoutManager mLayoutManager = new GridLayoutManager(context, 3);
         mGridImages.setLayoutManager(mLayoutManager);
@@ -66,6 +69,7 @@ public class NewsThreeItemView extends FrameLayout {
         relativeLayout.addView(mGridImages, imagesImagelp);
         ImageAdapter adapter = new ImageAdapter();
         mGridImages.setAdapter(adapter);
+        mGridImages.setEnabled(false);
 
         RelativeLayout.LayoutParams sourcelp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         sourcelp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
@@ -78,6 +82,18 @@ public class NewsThreeItemView extends FrameLayout {
         sourceText.setCompoundDrawablePadding(margin);
         relativeLayout.addView(sourceText, sourcelp);
         drawer = new NewsTimeDrawer(sourceText.getPaint());
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        boolean result= super.onInterceptTouchEvent(ev);
+//        LogUtils.e("result="+result);
+        return true;
+    }
+
+    @Override
+    public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
+        return super.requestFocus(direction, previouslyFocusedRect);
     }
 
     private int getDimen(int id) {

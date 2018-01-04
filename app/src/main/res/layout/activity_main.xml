@@ -19,15 +19,20 @@
             android:background="@color/colorPrimary"
             android:elevation="@dimen/elevation_height"
             android:outlineProvider="paddedBounds"
+            app:tabPaddingBottom="0dp"
+            app:tabPaddingEnd="0dp"
+            app:tabPaddingStart="0dp"
+            app:tabPaddingTop="0dp"
             app:tabIndicatorColor="@color/table_indicator"
             app:tabIndicatorHeight="4dp"
             app:tabSelectedTextColor="@color/white_FFFFFF"
             app:tabTextAppearance="@style/TabLayoutTextStyle"
             app:tabTextColor="@color/grey_text_5d5c5c" />
 
-        <ImageView
+        <com.aiqing.newssdk.view.RotateImageView
             android:id="@+id/iv_expand_taglayout"
             android:layout_width="@dimen/tablayout_height"
+            android:src="@mipmap/icon_expand"
             android:layout_height="match_parent"
             android:layout_gravity="right" />
     </FrameLayout>

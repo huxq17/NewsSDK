@@ -1002,6 +1002,9 @@ public class IWebView extends WebView {
             }
 
         });
+        webSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setLoadWithOverviewMode(true);
     }
 
     @Override

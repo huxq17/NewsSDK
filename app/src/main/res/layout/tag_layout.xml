@@ -2,27 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
     android:clickable="true"
     android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/tablayout_height">
+        android:layout_height="@dimen/tablayout_height"
+        android:background="@android:color/white">
 
-        <ImageView
+        <com.aiqing.newssdk.view.RotateImageView
             android:id="@+id/iv_collapse_taglayout"
             android:layout_width="@dimen/tablayout_height"
             android:layout_height="match_parent"
-            android:layout_gravity="right" />
+            android:layout_gravity="right"
+            android:src="@mipmap/icon_expand" />
     </FrameLayout>
 
     <com.huxq17.handygridview.HandyGridView
         android:id="@+id/hgv_tag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@android:color/white"
         android:horizontalSpacing="10dp"
         android:numColumns="4"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp" />
 </LinearLayout>
