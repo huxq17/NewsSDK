@@ -1,6 +1,7 @@
 package com.aiqing.newssdk.news.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
@@ -19,6 +20,7 @@ import java.util.List;
 public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, TagView.OnTagDeleteListener {
     private Context context;
     private List<Category> mDatas = new ArrayList<>();
+    private int mSelectedPosition;
 
     public TagViewAdapter(Context context, Category[] dataList) {
         this.context = context;
@@ -27,9 +29,10 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
 
     private boolean inEditMode = false;
 
-    public void setData(Category[] dataList) {
+    public void setData(Category[] dataList, int selectposition) {
         this.mDatas.clear();
         Collections.addAll(mDatas, dataList);
+        mSelectedPosition = selectposition;
         notifyDataSetChanged();
     }
 
@@ -60,8 +63,10 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
             textView = new TagView(context);
             convertView = textView;
             textView.setMaxLines(1);
-            textView.setHeight(DensityUtil.dip2px(context, 40));
+            textView.setHeight(DensityUtil.dip2px(context, 30));
             int id = context.getResources().getIdentifier("s_grid_item", "drawable", context.getPackageName());
+//            Utils.setStokenBg()
+//            Drawable normal = Utils.setStokenBg(0, 0, 0, Color.parseColor("#01304A"));
             Drawable drawable = context.getResources().getDrawable(id);
             textView.setBackgroundDrawable(drawable);
             textView.setGravity(Gravity.CENTER);
@@ -72,6 +77,11 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
             textView.showDeleteIcon(inEditMode);
         } else {
             textView.showDeleteIcon(false);
+        }
+        if(position==mSelectedPosition){
+            textView.setTextColor(Color.parseColor("#D74543"));
+        }else{
+            textView.setTextColor(Color.BLACK);
         }
         textView.setText(getItem(position).getTitle());
         textView.setOnTagDeleteListener(position, this);

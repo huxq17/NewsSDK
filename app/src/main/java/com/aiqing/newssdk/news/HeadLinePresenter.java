@@ -10,6 +10,7 @@ import com.aiqing.newssdk.config.Constants;
 import com.aiqing.newssdk.disklrucache.DiskCacheManager;
 import com.aiqing.newssdk.news.details.NewsDetailsActivity;
 import com.aiqing.newssdk.utils.LogWritter;
+import com.aiyou.toolkit.common.LogUtils;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 
@@ -173,6 +174,12 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
                             if (TextUtils.isEmpty(content)) return;
                             NewsDetailsActivity.start(mView.getContext(), content);
                             requestViewDetails = false;
+                        }
+                    }, new Consumer<Throwable>() {
+                        @Override
+                        public void accept(Throwable throwable) throws Exception {
+                            requestViewDetails = false;
+                            LogUtils.e("throwable msg="+throwable.getMessage());
                         }
                     });
         }

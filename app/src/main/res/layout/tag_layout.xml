@@ -1,32 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clickable="true"
     android:orientation="vertical">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/tablayout_height"
-        android:background="@android:color/white">
-
-        <com.aiqing.newssdk.view.RotateImageView
-            android:id="@+id/iv_collapse_taglayout"
-            android:layout_width="@dimen/tablayout_height"
-            android:layout_height="match_parent"
-            android:layout_gravity="right"
-            android:src="@mipmap/icon_expand" />
-    </FrameLayout>
-
     <com.huxq17.handygridview.HandyGridView
         android:id="@+id/hgv_tag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
+        android:layout_marginTop="@dimen/tablayout_height"
+        android:background="@color/base_back_FFFAFAFA"
         android:horizontalSpacing="10dp"
         android:numColumns="4"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
+        android:paddingTop="40dp"
         android:stretchMode="columnWidth"
         android:verticalSpacing="10dp" />
-</LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/tablayout_height"
+        android:background="@color/base_back_FFFAFAFA"
+        android:paddingLeft="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/tablayout_height"
+            android:gravity="center"
+            android:text="切换栏目"
+            android:textColor="@color/black_000000"
+            android:textSize="@dimen/text_size_small" />
+
+        <com.aiqing.newssdk.view.RotateImageView
+            android:id="@+id/iv_collapse_taglayout"
+            android:layout_width="@dimen/tablayout_height"
+            android:layout_height="@dimen/tablayout_height"
+            android:layout_gravity="right"
+            android:elevation="@dimen/elevation_height"
+            android:outlineProvider="background"
+            android:padding="10dp"
+            android:src="@mipmap/icon_expand" />
+    </FrameLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="@dimen/tablayout_height"
+        android:background="#EEEEEE" />
+</FrameLayout>

@@ -4,42 +4,64 @@
     android:id="@+id/parentPanel"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:orientation="vertical">
 
-    <FrameLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/tablayout_height">
+        android:layout_height="?attr/actionBarSize">
+    </android.support.v7.widget.Toolbar>
 
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tl_news_tabs"
+    <FrameLayout
+        android:id="@+id/fl_content_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tablayout_height">
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tl_news_tabs"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tablayout_height"
+                android:layout_marginRight="@dimen/tablayout_height"
+                android:background="@color/base_back_FFFAFAFA"
+                app:tabIndicatorColor="@color/table_indicator"
+                app:tabIndicatorHeight="0dp"
+                app:tabPaddingBottom="0dp"
+                app:tabPaddingEnd="0dp"
+                app:tabPaddingStart="0dp"
+                app:tabPaddingTop="0dp"
+                app:tabSelectedTextColor="#D74543"
+                app:tabTextAppearance="@style/TabLayoutTextStyle"
+                app:tabTextColor="@color/black_000000" />
+
+            <com.aiqing.newssdk.view.RotateImageView
+                android:id="@+id/iv_expand_taglayout"
+                android:layout_width="@dimen/tablayout_height"
+                android:layout_height="@dimen/tablayout_height"
+                android:layout_gravity="right"
+                android:background="@color/base_back_FFFAFAFA"
+                android:elevation="@dimen/elevation_height"
+                android:outlineProvider="background"
+                android:padding="10dp"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/icon_expand" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/tablayout_height"
+            android:background="#EEEEEE" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/vp_news_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginRight="@dimen/tablayout_height"
-            android:background="@color/colorPrimary"
-            android:elevation="@dimen/elevation_height"
-            android:outlineProvider="paddedBounds"
-            app:tabPaddingBottom="0dp"
-            app:tabPaddingEnd="0dp"
-            app:tabPaddingStart="0dp"
-            app:tabPaddingTop="0dp"
-            app:tabIndicatorColor="@color/table_indicator"
-            app:tabIndicatorHeight="4dp"
-            app:tabSelectedTextColor="@color/white_FFFFFF"
-            app:tabTextAppearance="@style/TabLayoutTextStyle"
-            app:tabTextColor="@color/grey_text_5d5c5c" />
-
-        <com.aiqing.newssdk.view.RotateImageView
-            android:id="@+id/iv_expand_taglayout"
-            android:layout_width="@dimen/tablayout_height"
-            android:src="@mipmap/icon_expand"
-            android:layout_height="match_parent"
-            android:layout_gravity="right" />
+            android:layout_marginTop="@dimen/viewpager_top_margin"
+            android:background="@color/base_back_FFFAFAFA" />
     </FrameLayout>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vp_news_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/base_back_FFFAFAFA" />
 </LinearLayout>

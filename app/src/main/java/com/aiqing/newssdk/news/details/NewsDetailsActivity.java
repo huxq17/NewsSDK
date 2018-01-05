@@ -29,9 +29,10 @@ public class NewsDetailsActivity extends BaseActivity {
         setContentView(R.layout.activity_news_details);
         mWebView = findViewById(R.id.wv_news_details);
         toolbar = findViewById(R.id.details_toolbar);
+        toolbar.setTitle("头条");
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().hide();
+//        getSupportActionBar().hide();
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

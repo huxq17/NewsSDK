@@ -4,38 +4,62 @@ import android.app.Activity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 
 import com.aiqing.newssdk.news.Category;
 import com.aiqing.newssdk.news.adapter.TagViewAdapter;
 import com.aiqing.newssdk.view.RotateImageView;
+import com.aiyou.toolkit.common.DensityUtil;
+import com.aiyou.toolkit.common.Utils;
+import com.aiyou.toolkit.tractor.listener.LoadListener;
 import com.huxq17.handygridview.HandyGridView;
 
-public class TagManager implements View.OnClickListener ,BackManager.OnBackListener {
+public class TagManager implements View.OnClickListener, BackManager.OnBackListener {
     private View tagLayout;
     private RotateImageView ivCollapse;
     private HandyGridView mTagGridView;
     private TagViewAdapter adapter;
     private Activity mActivity;
+    private int mScreenHeight;
+    private int mDuration = 300;
+    private int mTablayoutHeight;
+    private int mSelectedPosition;
+    private ViewGroup mParent;
+    private boolean isAnimation;
 
-    public TagManager(Activity activity, TagViewAdapter adapter) {
+    public TagManager(Activity activity, TagViewAdapter adapter, ViewGroup parent) {
         mActivity = activity;
         this.adapter = adapter;
+        mScreenHeight = Utils.getScreenHeight(activity);
+        mParent = parent;
+        mTablayoutHeight = activity.getResources().getDimensionPixelSize(R.dimen.tablayout_height) + DensityUtil.dip2px(activity, 20);
     }
 
-    public void expandTagLayout() {
+    public void setSelectedPosition(int selectedPosition) {
+        this.mSelectedPosition = selectedPosition;
+    }
+
+    private int mToolbarHeight;
+
+    public void expandTagLayout(int toolbarHeight) {
+        if (isAnimation) return;
+        if (mToolbarHeight == 0) {
+            mToolbarHeight = toolbarHeight;
+            mTablayoutHeight += mToolbarHeight;
+        }
         BackManager.INSTANCE.addBackListener(this);
-        ViewGroup parent = mActivity.findViewById(android.R.id.content);
         if (tagLayout == null) {
-            tagLayout = LayoutInflater.from(mActivity).inflate(R.layout.tag_layout, parent, false);
+            tagLayout = LayoutInflater.from(mActivity).inflate(R.layout.tag_layout, mParent, false);
             ivCollapse = tagLayout.findViewById(R.id.iv_collapse_taglayout);
             ivCollapse.setOnClickListener(this);
-            parent.addView(tagLayout);
+            mParent.addView(tagLayout);
         } else {
-            parent.removeView(tagLayout);
-            parent.addView(tagLayout);
+            mParent.removeView(tagLayout);
+            mParent.addView(tagLayout);
         }
-        ivCollapse.setRotate(45);
+        ivCollapse.startRotate(45, mDuration);
         setupTagGridView();
     }
 
@@ -49,22 +73,72 @@ public class TagManager implements View.OnClickListener ,BackManager.OnBackListe
         if (mTagGridView == null) {
             mTagGridView = tagLayout.findViewById(R.id.hgv_tag);
             mTagGridView.setAdapter(adapter);
-            mTagGridView.setSelectorEnabled(true);
+            mTagGridView.setSelectorEnabled(false);
             mTagGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    mListener.onItemClick(parent, view, position, id);
+                    mSelectedPosition = position;
+                    mListener.onItemClick(null, null, mSelectedPosition, 0);
                 }
             });
         } else {
-            adapter.setData(Category.values());
+            adapter.setData(Category.values(), mSelectedPosition);
         }
+        TranslateAnimation outAnimal = new TranslateAnimation(0f,
+                0f, -mScreenHeight, mTablayoutHeight - mTablayoutHeight);
+        outAnimal.setDuration(mDuration);
+        isAnimation = true;
+        outAnimal.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                isAnimation = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        mTagGridView.startAnimation(outAnimal);
+    }
+
+    public void collapseTagLayout(final LoadListener listener) {
+        if (isAnimation) return;
+        BackManager.INSTANCE.removeBackListener(this);
+        TranslateAnimation outAnimal = new TranslateAnimation(0f,
+                0f, 0, -mScreenHeight);
+        outAnimal.setDuration(mDuration);
+        mTagGridView.startAnimation(outAnimal);
+        ivCollapse.startRotate(0, mDuration);
+        isAnimation = true;
+        outAnimal.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mParent.removeView(tagLayout);
+                isAnimation = false;
+                if (listener != null)
+                    listener.onSuccess(mSelectedPosition);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     public void collapseTagLayout() {
-        BackManager.INSTANCE.removeBackListener(this);
-        ViewGroup parent = mActivity.findViewById(android.R.id.content);
-        parent.removeView(tagLayout);
+        collapseTagLayout(null);
     }
 
     @Override
@@ -76,7 +150,7 @@ public class TagManager implements View.OnClickListener ,BackManager.OnBackListe
 
     @Override
     public boolean onBack() {
-        if(tagLayout != null && tagLayout.getParent() != null){
+        if (tagLayout != null && tagLayout.getParent() != null) {
             collapseTagLayout();
             return true;
         }

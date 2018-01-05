@@ -1,5 +1,6 @@
 package com.aiqing.newssdk.news;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,9 +13,10 @@ import android.widget.TextView;
 
 import com.aiqing.newssdk.R;
 import com.aiqing.newssdk.base.BaseFragment;
+import com.aiqing.newssdk.decoration.RecyclerViewDivider;
 import com.aiqing.newssdk.rxbus.RxBus;
 import com.aiqing.newssdk.rxbus.RxConstants;
-import com.aiyou.toolkit.common.LogUtils;
+import com.aiyou.toolkit.common.DensityUtil;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseItem;
 import com.pandaq.pandaqlib.magicrecyclerView.BaseRecyclerAdapter;
 import com.pandaq.pandaqlib.magicrecyclerView.MagicRecyclerView;
@@ -52,7 +54,6 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
 
     @Override
     public String getCacheKey() {
-        LogUtils.e("getCacheKey key=" + mCategory.toString());
         return mCategory.toString();
     }
 
@@ -70,6 +71,8 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
 
         mLinearLayoutManager = new LinearLayoutManager(this.getContext());
         mNewsRecycler.setLayoutManager(mLinearLayoutManager);
+
+        mNewsRecycler.addItemDecoration(new RecyclerViewDivider(getContext(), LinearLayoutManager.HORIZONTAL, DensityUtil.dip2px(getContext(),1), Color.parseColor("#EEEEEE")));
         //屏蔽掉默认的动画，防止刷新时图片闪烁
         mNewsRecycler.getItemAnimator().setChangeDuration(0);
         initView();

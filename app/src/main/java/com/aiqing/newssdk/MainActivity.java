@@ -6,7 +6,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import com.aiqing.newssdk.base.BaseActivity;
@@ -14,6 +16,7 @@ import com.aiqing.newssdk.news.Category;
 import com.aiqing.newssdk.news.HeadLineFragment;
 import com.aiqing.newssdk.news.adapter.TagViewAdapter;
 import com.aiqing.newssdk.view.RotateImageView;
+import com.aiyou.toolkit.tractor.listener.impl.LoadListenerImpl;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -23,11 +26,13 @@ import io.reactivex.functions.Consumer;
 
 public class MainActivity extends BaseActivity implements ViewPager.OnPageChangeListener, View.OnClickListener {
 
-    private ArrayList<Fragment> mFragmentArrayList;
+    private ArrayList<Fragment> mFragmentArrayList = new ArrayList<>();
     ViewPager mVpNewsList;
     TabLayout mTlNewsTabs;
     private RotateImageView ivExpand;
     private TagManager tagManager;
+    private Toolbar toolbar;
+    private ViewGroup parent;
 
     static {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -40,6 +45,12 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
         mVpNewsList = f(R.id.vp_news_list);
         mTlNewsTabs = f(R.id.tl_news_tabs);
         ivExpand = f(R.id.iv_expand_taglayout);
+        parent = f(R.id.fl_content_parent);
+        toolbar = findViewById(R.id.main_toolbar);
+        toolbar.setTitle("头条");
+        setSupportActionBar(toolbar);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().hide();
         initView();
         Observable.interval(1, TimeUnit.SECONDS).take(100)
                 .subscribe(new Consumer<Long>() {
@@ -51,7 +62,6 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     }
 
     private void initView() {
-        mFragmentArrayList = new ArrayList<>();
         for (Category category : Category.values()) {
             mFragmentArrayList.add(HeadLineFragment.create(category));
         }
@@ -75,16 +85,21 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
         mTlNewsTabs.setupWithViewPager(mVpNewsList);
         mTlNewsTabs.setTabMode(TabLayout.MODE_SCROLLABLE);
         ivExpand.setOnClickListener(this);
-        tagManager = new TagManager(this, new TagViewAdapter(this, Category.values()));
+        tagManager = new TagManager(this, new TagViewAdapter(this, Category.values()), parent);
         tagManager.setTagClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mVpNewsList.setCurrentItem(position);
-                tagManager.collapseTagLayout();
+                tagManager.collapseTagLayout(new LoadListenerImpl() {
+                    @Override
+                    public void onSuccess(Object result) {
+                        super.onSuccess(result);
+                        int position = (int) result;
+                        mVpNewsList.setCurrentItem(position);
+                    }
+                });
             }
         });
     }
-
 
     @Override
     protected void onDestroy() {
@@ -98,7 +113,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
 
     @Override
     public void onPageSelected(int position) {
-
+        tagManager.setSelectedPosition(position);
     }
 
     @Override
@@ -109,7 +124,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     @Override
     public void onClick(View v) {
         if (v == ivExpand) {
-            tagManager.expandTagLayout();
+            tagManager.expandTagLayout(toolbar.getHeight());
         }
     }
 
