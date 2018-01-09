@@ -11,8 +11,8 @@ public interface OnItemMovedListener {
 
     /**
      * return true if the item of special position can not move.
-     * @param position
-     * @return
+     * @param position fixed position
+     * @return whether the specific position is fixed.
      */
     boolean isFixed(int position);
 }

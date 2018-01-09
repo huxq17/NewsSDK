@@ -1,1 +1,1 @@
-include ':app', ':pandaqlib', ':toolkit', ':handygridview'
+include ':sdk', ':pandaqlib', ':toolkit', ':client', ':handygridview'

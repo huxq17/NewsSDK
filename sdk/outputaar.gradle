@@ -1,0 +1,201 @@
+import java.text.SimpleDateFormat
+
+def aarPath = buildDir.path + "/outputs/aar/"
+def aarlibPath = aarPath + "libs/"
+
+def buildTime() {
+    def df = new SimpleDateFormat("yyyyMMdd")
+    df.setTimeZone(TimeZone.getDefault())
+    return df.format(new Date())
+}
+
+def getJarName() {
+    return "NEWSSDK" + sdkVersion() + "_" + PACKAGE_TYPE
+}
+
+def getAARName() {
+    return "NEWSSDK" + buildTime() + sdkVersion() + "_" + PACKAGE_TYPE + ".aar"
+}
+
+def getToolkitName() {
+    return "toolkit" + buildTime() + sdkVersion() + "_" + PACKAGE_TYPE + ".aar"
+}
+
+
+def sdkVersion() {
+    return "V" + REAL_SDK_VERVISION
+}
+
+task aarRelease(type: Copy) {
+    def rootPath = project.buildDir.path
+
+    def aarOutPath = rootPath + "/outputs/aar"
+    def aiyouPath = aarOutPath + "/sdk-release.aar"
+    def originSdkName = "sdk-release.aar"
+    delete aarOutPath
+    dependsOn 'assembleRelease'
+    from aarOutPath
+    into aarOutPath
+    include originSdkName
+    rename(originSdkName, getAARName())
+    def toolkitpath = rootProject.rootDir.path + "/toolkit/build/outputs/aar"
+    from toolkitpath
+    into aarOutPath
+    def toolkitname = "toolkit-release.aar"
+    include toolkitname
+    rename(toolkitname, getToolkitName())
+}
+task sync_aars() {
+    def jar_name
+    def aar_path
+    def dest_dir = aarPath
+    outputs.upToDateWhen { false }
+    doLast {
+        def aarFile = file(aarPath)
+        aarFile.listFiles().each {
+            if (it.getName().endsWith(".aar")) {
+                aar_path = it.getPath()
+                def taskName = "copyAAR${it.name}"
+                jar_name = "libs/" + it.getName().replace(".aar", ".jar")
+                Copy copyAAR = task(taskName, type: Copy)
+                copyAAR.from zipTree(aar_path)
+                copyAAR.into dest_dir
+                copyAAR.rename 'classes.jar', jar_name
+                copyAAR.execute()
+                delete aar_path
+            }
+        }
+        System.out.println("api " +";canBeResolved="+configurations.api.canBeResolved+";canBeConsumed="+configurations.api.canBeConsumed)
+        System.out.println("compile " +";canBeResolved="+configurations.compile.canBeResolved+";canBeConsumed="+configurations.compile.canBeConsumed)
+        configurations.api.findAll {
+            it.getName().endsWith(".aar")
+        }.collect {
+            aar_path = it.getPath()
+            System.out.println("library=" + aar_path)
+            def taskName = "copyAAR${it.name}"
+            jar_name = "libs/" + it.getName().replace(".aar", ".jar")
+            Copy copyAAR = task(taskName, type: Copy)
+            copyAAR.from zipTree(aar_path)
+            copyAAR.into dest_dir
+            copyAAR.rename 'classes.jar', jar_name
+            copyAAR.exclude 'AndroidManifest.xml'
+            copyAAR.execute()
+        }
+        delete "build/libs/"
+        task(genSdkJar, type: Jar) {
+            baseName getJarName()
+            from("${aarPath}assets/")
+            file(aarlibPath).listFiles().findAll {
+                it.name.endsWith("release.jar")
+            } collect {
+                from zipTree(it)
+            }
+        }.execute()
+    }
+}
+task sync_jars(dependsOn: sync_aars) << {
+    //把所有依赖的.jar库都拷贝到build/aar/libs下
+    Copy copyJars = task(copyJarToLibs, type: Copy)
+    copyJars.from configurations.compile.findAll {
+        it.getName().endsWith(".jar")
+    }
+    copyJars.into aarlibPath
+    copyJars.execute()
+}
+task copy_jar(dependsOn: sync_jars) << {
+    def jarpath = buildDir.path + "/jar/"
+//    def filetree = fileTree(buildDir.path + "/aar/libs")
+    def aarlibs = file(aarlibPath)
+    //解压jar包
+    aarlibs.listFiles().each {
+        if (it.getName().endsWith(".jar")) {
+//            println "it.name=" + it.getName()
+            def taskName = "unZipJar {$it.name}"
+            Copy unZipJar = task(taskName, type: Copy)
+            unZipJar.from zipTree(it)
+            unZipJar.into jarpath
+            unZipJar.exclude {
+                it.path.contains('META-INF') || it.name.startsWith('.')
+            }
+            unZipJar.execute()
+        }
+    }
+    //打出classes.jar
+    Zip packJar = task(packJar, type: Zip)
+    def classPath = jarpath
+    packJar.baseName = "classes"
+    packJar.extension = "jar"
+    packJar.from classPath
+    packJar.destinationDir = file(aarPath)
+    packJar.execute()
+    delete classPath
+}
+task makeaar(dependsOn: copy_jar) << {
+    task(gen_aar, type: Zip) {
+        //生成最终的aar包，注意libs目录需要被排除
+        def dest_dir = aarPath
+        def outputpath = buildDir.getPath() + "/libs/"
+//        delete outputpath
+        baseName = getJarName()
+        extension = "aar"
+        destinationDir = file(outputpath)
+        from dest_dir
+        exclude "libs"
+    }.execute()
+    //删除
+//    delete aarPath
+}
+//afterEvaluate {
+//    def dx = tasks.findByName("assembleRelease")
+//
+//    makeaar.dependsOn dx.taskDependencies.getDependencies(dx)
+//    makeJar.dependsOn makeaar
+//    dx.dependsOn makeJar
+////    disableDebugBuild()
+//}
+afterEvaluate {
+    configurations.api.canBeResolved = true
+//    def dx = tasks.findByName("transformClassesWithDexForDebug")
+//
+//    makeaar.dependsOn bundleRelease
+//    makeJar.dependsOn makeaar
+//    dx.dependsOn makeJar
+//    project.tasks.getByName("bundleRelease") {
+//        it.doLast {
+//            println "bundleRelease dolast"
+//            sync_aars.execute()
+//            sync_jars.execute()
+//            copy_jar.execute()
+//            makeaar.execute()
+//        }
+//    }
+    project(":toolkit").tasks.getNames().each {
+//        println "app task.name=" + it
+    }
+//        println "app:assemble.dependesOn = "+it.toString()
+//    }
+    project.tasks.getByName("bundleRelease").outputs.upToDateWhen { false }
+    project.tasks.getByName("bundleRelease").finalizedBy makeaar
+    //:app:_debugApk
+    tasks.matching {
+        it.name == 'transformClassesWithDexForDebug'
+    }.each { tk ->
+        tk.dependsOn(makeaar, makeJar)
+    }
+}
+gradle.getTaskGraph().whenReady {
+    project.tasks.all {
+        Task t = it
+        String taskName = it.name
+        if (it.name == "build") {
+            println("--------taskName-----------:" + taskName)
+            it.getTaskDependencies().any {
+                println("-----------------taskName----dependsOn-----------------:")
+                it.getDependencies(t).findAll() {
+                    println("----------------------------------:" + it.getPath())
+                }
+            }
+        }
+
+    }
+}

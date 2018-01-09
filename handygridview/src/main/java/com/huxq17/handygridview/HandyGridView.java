@@ -209,7 +209,7 @@ public class HandyGridView extends GridView implements AdapterView.OnItemLongCli
      * When set, will change TOUCH mode to LONG_PRESS mode if the content of gridview can not scroll.
      * Set by default.
      *
-     * @param autoOptimize
+     * @param autoOptimize whether auto optimize, default is true.
      */
     public void setAutoOptimize(boolean autoOptimize) {
         mAutoOptimize = autoOptimize;
@@ -222,7 +222,7 @@ public class HandyGridView extends GridView implements AdapterView.OnItemLongCli
     /**
      * set the number of pixels gridview scrolled per second.
      *
-     * @param scrollSpeed
+     * @param scrollSpeed the scroll speed.
      */
     public void setScrollSpeed(int scrollSpeed) {
         mScrollSpeed = scrollSpeed;
@@ -529,7 +529,7 @@ public class HandyGridView extends GridView implements AdapterView.OnItemLongCli
     /**
      * detact whether the content of gridview can scroll down.
      *
-     * @return
+     * @return true if can scroll down.
      */
     public boolean canScrollDown() {
         final int threshold = mClipToPadding ? 0 : getListPaddingTop();
@@ -542,7 +542,7 @@ public class HandyGridView extends GridView implements AdapterView.OnItemLongCli
     /**
      * detact whether the content of gridview can scroll up.
      *
-     * @return
+     * @return true if can scroll up.
      */
     public boolean canScrollUp() {
         final int threshold = mClipToPadding ? -mScrollY : getListPaddingBottom();

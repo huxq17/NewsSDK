@@ -7,7 +7,7 @@ public interface IDrawer {
     /**
      * You can draw something in gridview by this method.
      *
-     * @param canvas
+     * @param canvas canvas
      * @param width  the gridview's width
      * @param height the gridview's height
      */
