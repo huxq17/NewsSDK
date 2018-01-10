@@ -45,7 +45,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_sdk);
         mVpNewsList = f(R.id.vp_news_list);
         mTlNewsTabs = f(R.id.tl_news_tabs);
         ivExpand = f(R.id.iv_expand_taglayout);

@@ -26,7 +26,7 @@ android {
 }
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(':pandaqlib')
+    implementation 'com.squareup.okhttp3:okhttp:3.7.0'
 }
 afterEvaluate {
 //    disableDebugBuild()

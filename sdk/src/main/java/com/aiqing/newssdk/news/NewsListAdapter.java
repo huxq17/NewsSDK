@@ -127,7 +127,7 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
 
         @Override
         public void bind(int position, BaseItem data) {
-            SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
+            NewsList.DataBean topNews = (NewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
             long time  = topNews.getPublish_time();
@@ -162,7 +162,7 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
 
         @Override
         public void bind(int position, BaseItem data) {
-            SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
+            NewsList.DataBean topNews = (NewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
             final String avatar = topNews.getMedia_avatar_url();
@@ -205,7 +205,7 @@ public class NewsListAdapter extends BaseRecyclerAdapter {
 
         @Override
         public void bind(int position, BaseItem data) {
-            SDKNewsList.DataBean topNews = (SDKNewsList.DataBean) data.getData();
+            NewsList.DataBean topNews = (NewsList.DataBean) data.getData();
             mNewsTitle.setText(topNews.getTitle());
             mSource.setText(topNews.getMedia_name());
             long time  = topNews.getPublish_time();

@@ -1,1 +1,1 @@
-# NewsSDK
+# com.aiqing.newssdk.SDKHelper

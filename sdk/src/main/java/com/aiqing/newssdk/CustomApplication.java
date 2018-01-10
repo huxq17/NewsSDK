@@ -13,7 +13,7 @@ public class CustomApplication {
     private static Context mContext;
 
     public static void init(Context context) {
-        mContext = context;
+        mContext = context.getApplicationContext();
     }
 
     public static Context getContext() {

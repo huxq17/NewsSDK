@@ -230,7 +230,7 @@ public class HeadLineFragment extends BaseFragment implements NewsContract.View,
 
     @Override
     public void onItemClick(int position, BaseItem data, View view) {
-        mPresenter.viewNewsDetails((SDKNewsList.DataBean) data.getData());
+        mPresenter.viewNewsDetails((NewsList.DataBean) data.getData());
 
         //跳转到其他界面
 //        NewsBean topNews = (NewsBean) data.getData();

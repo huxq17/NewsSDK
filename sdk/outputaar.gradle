@@ -53,7 +53,7 @@ task sync_aars() {
     doLast {
         def aarFile = file(aarPath)
         aarFile.listFiles().each {
-            if (it.getName().endsWith(".aar")) {
+            if (it.getName().endsWith(".aar") && it.name.contains("release")) {
                 aar_path = it.getPath()
                 def taskName = "copyAAR${it.name}"
                 jar_name = "libs/" + it.getName().replace(".aar", ".jar")
@@ -65,32 +65,48 @@ task sync_aars() {
                 delete aar_path
             }
         }
-        System.out.println("api " +";canBeResolved="+configurations.api.canBeResolved+";canBeConsumed="+configurations.api.canBeConsumed)
-        System.out.println("compile " +";canBeResolved="+configurations.compile.canBeResolved+";canBeConsumed="+configurations.compile.canBeConsumed)
-        configurations.api.findAll {
-            it.getName().endsWith(".aar")
+        android.libraryVariants.all { variant ->
+            if (variant.name.contains("release")) {
+                configurations.api.getDependencies().each { configDep ->
+                    variant.getCompileClasspath().each { fileDependency ->
+                        if (fileDependency.absolutePath.contains(configDep.name)) {
+                            println "test "+fileDependency.name + ";dependency.name=" + configDep.name
+                            def taskName = "copyAAR${configDep.name}"
+                            Copy copyJar = task(taskName, type: Copy)
+                            copyJar.from fileDependency.path
+                            copyJar.into aarPath + "/libs/"
+                            copyJar.rename 'classes.jar', configDep.name + ".jar"
+                            copyJar.execute()
+                        }
+                    }
+                }
+            }
+        }
+        configurations.compile.findAll {
+            it.name.endsWith(".aar")&&!it.getPath().contains("support")
         }.collect {
             aar_path = it.getPath()
-            System.out.println("library=" + aar_path)
             def taskName = "copyAAR${it.name}"
             jar_name = "libs/" + it.getName().replace(".aar", ".jar")
             Copy copyAAR = task(taskName, type: Copy)
             copyAAR.from zipTree(aar_path)
             copyAAR.into dest_dir
             copyAAR.rename 'classes.jar', jar_name
-            copyAAR.exclude 'AndroidManifest.xml'
+            copyAAR.exclude 'AndroidManifest.xml','R.txt'
             copyAAR.execute()
         }
         delete "build/libs/"
-        task(genSdkJar, type: Jar) {
-            baseName getJarName()
-            from("${aarPath}assets/")
-            file(aarlibPath).listFiles().findAll {
-                it.name.endsWith("release.jar")
-            } collect {
-                from zipTree(it)
-            }
-        }.execute()
+
+        delete "build/outputs/aar/${project.name}-debug.aar"
+//        task(genSdkJar, type: Jar) {
+//            baseName getJarName()
+//            from("${aarPath}assets/")
+//            file(aarlibPath).listFiles().findAll {
+//                it.name.endsWith("release.jar")
+//            } collect {
+//                from zipTree(it)
+//            }
+//        }.execute()
     }
 }
 task sync_jars(dependsOn: sync_aars) << {
@@ -154,7 +170,7 @@ task makeaar(dependsOn: copy_jar) << {
 ////    disableDebugBuild()
 //}
 afterEvaluate {
-    configurations.api.canBeResolved = true
+//    configurations.api.canBeResolved = true
 //    def dx = tasks.findByName("transformClassesWithDexForDebug")
 //
 //    makeaar.dependsOn bundleRelease
@@ -177,11 +193,11 @@ afterEvaluate {
     project.tasks.getByName("bundleRelease").outputs.upToDateWhen { false }
     project.tasks.getByName("bundleRelease").finalizedBy makeaar
     //:app:_debugApk
-    tasks.matching {
-        it.name == 'transformClassesWithDexForDebug'
-    }.each { tk ->
-        tk.dependsOn(makeaar, makeJar)
-    }
+//    tasks.matching {
+//        it.name == 'transformClassesWithDexForDebug'
+//    }.each { tk ->
+//        tk.dependsOn(makeaar)
+//    }
 }
 gradle.getTaskGraph().whenReady {
     project.tasks.all {

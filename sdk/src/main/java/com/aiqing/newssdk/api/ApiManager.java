@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiManager {
 
     private NetEasyNewsApi mNewsApi;
-    private SDKNewsApi mSDKNewsApi;
+    private NewsApi mSDKNewsApi;
     private static ApiManager sApiManager;
 
     private static OkHttpClient mClient = new OkHttpClient.Builder()
@@ -53,7 +53,7 @@ public class ApiManager {
         return mNewsApi;
     }
 
-    public SDKNewsApi getSDKNewsList() {
+    public NewsApi getSDKNewsList() {
         if (mSDKNewsApi == null) {
             Retrofit retrofit = new Retrofit.Builder()
                     .baseUrl(Config.SDK_API_URL)
@@ -61,7 +61,7 @@ public class ApiManager {
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
-            mSDKNewsApi = retrofit.create(SDKNewsApi.class);
+            mSDKNewsApi = retrofit.create(NewsApi.class);
         }
         return mSDKNewsApi;
     }

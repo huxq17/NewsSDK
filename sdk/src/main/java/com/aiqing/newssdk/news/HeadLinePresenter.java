@@ -47,33 +47,33 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         final Category category = mView.getCategory();
         if (category != null) {
             ApiManager.getInstence().getSDKNewsList().getNewsList(category.toString())
-                    .map(new Function<SDKNewsList, List<SDKNewsList.DataBean>>() {
+                    .map(new Function<NewsList, List<NewsList.DataBean>>() {
 
                         @Override
-                        public List<SDKNewsList.DataBean> apply(SDKNewsList topNewsList) throws Exception {
+                        public List<NewsList.DataBean> apply(NewsList topNewsList) throws Exception {
                             int rc = topNewsList.getRc();
                             String msg = topNewsList.getMsg();
                             int count = topNewsList.getCount();
-                            List<SDKNewsList.DataBean> datas = topNewsList.getData();
+                            List<NewsList.DataBean> datas = topNewsList.getData();
                             timeStamp = datas.get(datas.size() - 1).getPublish_time();
                             return datas;
                         }
                     })
-                    .concatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
+                    .concatMap(new Function<List<NewsList.DataBean>, ObservableSource<NewsList.DataBean>>() {
                         @Override
-                        public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
+                        public ObservableSource<NewsList.DataBean> apply(List<NewsList.DataBean> dataBeans) throws Exception {
                             return Observable.fromIterable(dataBeans);
                         }
                     })
-                    .map(new Function<SDKNewsList.DataBean, BaseItem>() {
+                    .map(new Function<NewsList.DataBean, BaseItem>() {
                         @Override
-                        public BaseItem apply(SDKNewsList.DataBean newsBean) throws Exception {
-                            BaseItem<SDKNewsList.DataBean> baseItem = new BaseItem<>();
+                        public BaseItem apply(NewsList.DataBean newsBean) throws Exception {
+                            BaseItem<NewsList.DataBean> baseItem = new BaseItem<>();
                             boolean hasImage = newsBean.isHas_image();
                             if (!hasImage) {
                                 baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL);
                             } else {
-                                SDKNewsList.DataBean.MiddleImageBean middleImageBean = newsBean.getMiddle_image();
+                                NewsList.DataBean.MiddleImageBean middleImageBean = newsBean.getMiddle_image();
                                 List<NewsBean> list = middleImageBean.getUrl_list();
                                 if (list.size() == 1) {
                                     baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_ONE);
@@ -126,18 +126,18 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
 
     private boolean requestViewDetails = false;
 
-    public void viewNewsDetails(final SDKNewsList.DataBean dataBean) {
+    public void viewNewsDetails(final NewsList.DataBean dataBean) {
         if (!requestViewDetails) {
             requestViewDetails = true;
-            Observable.create(new ObservableOnSubscribe<SDKNewsList.DataBean>() {
+            Observable.create(new ObservableOnSubscribe<NewsList.DataBean>() {
                 @Override
-                public void subscribe(ObservableEmitter<SDKNewsList.DataBean> e) throws Exception {
+                public void subscribe(ObservableEmitter<NewsList.DataBean> e) throws Exception {
                     e.onNext(dataBean);
                 }
             })
-                    .map(new Function<SDKNewsList.DataBean, String>() {
+                    .map(new Function<NewsList.DataBean, String>() {
                         @Override
-                        public String apply(SDKNewsList.DataBean dataBean) throws Exception {
+                        public String apply(NewsList.DataBean dataBean) throws Exception {
                             return dataBean.getUrl();
                         }
                     })
@@ -192,36 +192,36 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         final Category category = mView.getCategory();
         if (category != null) {
             ApiManager.getInstence().getSDKNewsList().getMore(category.toString(), timeStamp)
-                    .map(new Function<SDKNewsList, List<SDKNewsList.DataBean>>() {
+                    .map(new Function<NewsList, List<NewsList.DataBean>>() {
 
                         @Override
-                        public List<SDKNewsList.DataBean> apply(SDKNewsList topNewsList) throws Exception {
-                            List<SDKNewsList.DataBean> datas = topNewsList.getData();
+                        public List<NewsList.DataBean> apply(NewsList topNewsList) throws Exception {
+                            List<NewsList.DataBean> datas = topNewsList.getData();
                             timeStamp = datas.get(datas.size() - 1).getPublish_time();
                             return datas;
                         }
                     })
-                    .concatMap(new Function<List<SDKNewsList.DataBean>, ObservableSource<SDKNewsList.DataBean>>() {
+                    .concatMap(new Function<List<NewsList.DataBean>, ObservableSource<NewsList.DataBean>>() {
                         @Override
-                        public ObservableSource<SDKNewsList.DataBean> apply(List<SDKNewsList.DataBean> dataBeans) throws Exception {
+                        public ObservableSource<NewsList.DataBean> apply(List<NewsList.DataBean> dataBeans) throws Exception {
                             return Observable.fromIterable(dataBeans);
                         }
                     })
-                    .skipWhile(new Predicate<SDKNewsList.DataBean>() {
+                    .skipWhile(new Predicate<NewsList.DataBean>() {
                         @Override
-                        public boolean test(SDKNewsList.DataBean dataBean) throws Exception {
+                        public boolean test(NewsList.DataBean dataBean) throws Exception {
                             return false;
                         }
                     })
-                    .map(new Function<SDKNewsList.DataBean, BaseItem>() {
+                    .map(new Function<NewsList.DataBean, BaseItem>() {
                         @Override
-                        public BaseItem apply(SDKNewsList.DataBean newsBean) throws Exception {
-                            BaseItem<SDKNewsList.DataBean> baseItem = new BaseItem<>();
+                        public BaseItem apply(NewsList.DataBean newsBean) throws Exception {
+                            BaseItem<NewsList.DataBean> baseItem = new BaseItem<>();
                             boolean hasImage = newsBean.isHas_image();
                             if (!hasImage) {
                                 baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_NORMAL);
                             } else {
-                                SDKNewsList.DataBean.MiddleImageBean middleImageBean = newsBean.getMiddle_image();
+                                NewsList.DataBean.MiddleImageBean middleImageBean = newsBean.getMiddle_image();
                                 List<NewsBean> list = middleImageBean.getUrl_list();
                                 if (list.size() == 1) {
                                     baseItem.setItemType(BaseRecyclerAdapter.RecyclerItemType.TYPE_ONE);
@@ -282,7 +282,7 @@ class HeadLinePresenter extends BasePresenter implements NewsContract.Presenter 
         DiskCacheManager manager = new DiskCacheManager(CustomApplication.getContext(), Constants.CACHE_NEWS_FILE);
         ArrayList<BaseItem> topNews = manager.getSerializable(mView.getCacheKey());
         if (topNews != null) {
-            SDKNewsList.DataBean dataBean = (SDKNewsList.DataBean) topNews.get(topNews.size() - 1).getData();
+            NewsList.DataBean dataBean = (NewsList.DataBean) topNews.get(topNews.size() - 1).getData();
             timeStamp = dataBean.getPublish_time();
             mView.refreshNewsSuccessed(topNews);
         } else {

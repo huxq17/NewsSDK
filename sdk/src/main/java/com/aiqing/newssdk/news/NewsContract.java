@@ -47,6 +47,6 @@ public interface NewsContract {
 
         void loadCache();
 
-        void viewNewsDetails(SDKNewsList.DataBean dataBean);
+        void viewNewsDetails(NewsList.DataBean dataBean);
     }
 }

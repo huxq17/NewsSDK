@@ -2,18 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-
-
-
     defaultConfig {
         applicationId "com.aiqing.client"
         minSdkVersion 15
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
     }
 
     buildTypes {
@@ -24,6 +19,11 @@ android {
     }
 
 }
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -33,5 +33,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    compile project(':sdk')
+    implementation 'com.android.support:cardview-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+//    compile project(':sdk')
+    compile(name: 'NEWSSDKV1.0.0_release', ext: 'aar')
 }
