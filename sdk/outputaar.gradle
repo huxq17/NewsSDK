@@ -53,7 +53,7 @@ task sync_aars() {
     doLast {
         def aarFile = file(aarPath)
         aarFile.listFiles().each {
-            if (it.getName().endsWith(".aar") && it.name.contains("release")) {
+            if (it.getName().endsWith(".aar") && it.name.contains("debug")) {
                 aar_path = it.getPath()
                 def taskName = "copyAAR${it.name}"
                 jar_name = "libs/" + it.getName().replace(".aar", ".jar")
@@ -66,7 +66,7 @@ task sync_aars() {
             }
         }
         android.libraryVariants.all { variant ->
-            if (variant.name.contains("release")) {
+            if (variant.name.contains("debug")) {
                 configurations.api.getDependencies().each { configDep ->
                     variant.getCompileClasspath().each { fileDependency ->
                         if (fileDependency.absolutePath.contains(configDep.name)) {
@@ -97,7 +97,7 @@ task sync_aars() {
         }
         delete "build/libs/"
 
-        delete "build/outputs/aar/${project.name}-debug.aar"
+        delete "build/outputs/aar/${project.name}-release.aar"
 //        task(genSdkJar, type: Jar) {
 //            baseName getJarName()
 //            from("${aarPath}assets/")
@@ -190,14 +190,14 @@ afterEvaluate {
     }
 //        println "app:assemble.dependesOn = "+it.toString()
 //    }
-    project.tasks.getByName("bundleRelease").outputs.upToDateWhen { false }
-    project.tasks.getByName("bundleRelease").finalizedBy makeaar
+    project.tasks.getByName("assembleDebug").outputs.upToDateWhen { false }
+    project.tasks.getByName("assembleDebug").finalizedBy makeaar
     //:app:_debugApk
-//    tasks.matching {
-//        it.name == 'transformClassesWithDexForDebug'
-//    }.each { tk ->
-//        tk.dependsOn(makeaar)
-//    }
+    tasks.matching {
+        it.name == 'transformClassesWithDexForDebug'
+    }.each { tk ->
+        tk.dependsOn(makeaar)
+    }
 }
 gradle.getTaskGraph().whenReady {
     project.tasks.all {
@@ -212,6 +212,5 @@ gradle.getTaskGraph().whenReady {
                 }
             }
         }
-
     }
 }
