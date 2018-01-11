@@ -21,10 +21,11 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/tablayout_height">
 
-            <android.support.design.widget.TabLayout
+            <com.aiqing.newssdk.view.tablayout.TabLayout
                 android:id="@+id/tl_news_tabs"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/tablayout_height"
+                app:tabMaxWidth="0dp"
                 android:layout_marginRight="@dimen/tablayout_height"
                 android:background="@color/base_back_FFFAFAFA"
                 app:tabIndicatorColor="@color/table_indicator"

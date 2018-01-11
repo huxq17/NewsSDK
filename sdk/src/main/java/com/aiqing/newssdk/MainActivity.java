@@ -1,7 +1,6 @@
 package com.aiqing.newssdk;
 
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -16,6 +15,7 @@ import com.aiqing.newssdk.news.Category;
 import com.aiqing.newssdk.news.HeadLineFragment;
 import com.aiqing.newssdk.news.adapter.TagViewAdapter;
 import com.aiqing.newssdk.view.RotateImageView;
+import com.aiqing.newssdk.view.tablayout.TabLayout;
 import com.aiyou.toolkit.tractor.listener.impl.LoadListenerImpl;
 
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 //        getSupportActionBar().hide();
         initView();
-        Observable.interval(1, TimeUnit.SECONDS).take(100)
+        Observable.interval(1, TimeUnit.SECONDS).take(10)
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long aLong) throws Exception {
@@ -66,16 +66,17 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
     }
 
     <T> ObservableTransformer<T, T> applySchedulers() {
-        return (ObservableTransformer<T, T>)schedulersTransformer;
+        return (ObservableTransformer<T, T>) schedulersTransformer;
     }
 
-    final ObservableTransformer schedulersTransformer =new ObservableTransformer() {
+    final ObservableTransformer schedulersTransformer = new ObservableTransformer() {
         @Override
         public ObservableSource apply(Observable upstream) {
             return upstream.subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());
         }
     };
+
     private void initView() {
         for (Category category : Category.values()) {
             mFragmentArrayList.add(HeadLineFragment.create(category));
@@ -114,6 +115,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
                 });
             }
         });
+
 //        try {
 //            Field field = mVpNewsList.getClass().getDeclaredField("MAX_SETTLE_DURATION");
 //            field.setAccessible(true);

@@ -73,6 +73,7 @@ public class TagManager implements View.OnClickListener, BackManager.OnBackListe
         if (mTagGridView == null) {
             mTagGridView = tagLayout.findViewById(R.id.hgv_tag);
             mTagGridView.setAdapter(adapter);
+//            mTagGridView.setMode(HandyGridView.MODE.LONG_PRESS);
             mTagGridView.setSelectorEnabled(false);
             mTagGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -85,7 +86,7 @@ public class TagManager implements View.OnClickListener, BackManager.OnBackListe
             adapter.setData(Category.values(), mSelectedPosition);
         }
         TranslateAnimation outAnimal = new TranslateAnimation(0f,
-                0f, -mScreenHeight, mTablayoutHeight - mTablayoutHeight);
+                0f, -mScreenHeight, 0);
         outAnimal.setDuration(mDuration);
         isAnimation = true;
         outAnimal.setAnimationListener(new Animation.AnimationListener() {

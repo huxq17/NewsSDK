@@ -3,6 +3,8 @@ package com.aiqing.newssdk.news.adapter;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.support.v4.widget.TextViewCompat;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +65,7 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
             textView = new TagView(context);
             convertView = textView;
             textView.setMaxLines(1);
+//            textView.setSingleLine();
             textView.setHeight(DensityUtil.dip2px(context, 30));
             int id = context.getResources().getIdentifier("s_grid_item", "drawable", context.getPackageName());
 //            Utils.setStokenBg()
@@ -70,6 +73,8 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
             Drawable drawable = context.getResources().getDrawable(id);
             textView.setBackgroundDrawable(drawable);
             textView.setGravity(Gravity.CENTER);
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(textView, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+            TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(textView, 5, (int) textView.getTextSize(), 1, TypedValue.COMPLEX_UNIT_PX);
         } else {
             textView = (TagView) convertView;
         }
@@ -78,12 +83,13 @@ public class TagViewAdapter extends BaseAdapter implements OnItemMovedListener, 
         } else {
             textView.showDeleteIcon(false);
         }
-        if(position==mSelectedPosition){
+        if (position == mSelectedPosition) {
             textView.setTextColor(Color.parseColor("#D74543"));
-        }else{
+        } else {
             textView.setTextColor(Color.BLACK);
         }
         textView.setText(getItem(position).getTitle());
+//        textView.setText(getItem(position).getTitle()+"哒哒哒啊dad");
         textView.setOnTagDeleteListener(position, this);
         return convertView;
     }

@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+        SDKHelper.open(this);
     }
 
     public void open(View v) {
