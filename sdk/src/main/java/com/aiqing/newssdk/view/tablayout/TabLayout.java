@@ -64,8 +64,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.aiyou.toolkit.common.LogUtils;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -1525,26 +1523,24 @@ public class TabLayout extends HorizontalScrollView {
                 // Else, use the original width spec
                 widthMeasureSpec = origWidthMeasureSpec;
             }
-//            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            int originWidth = (int) (mTextView.getPaint().measureText(mTextView.getText().toString()));
+            int parentChildCount = mTabStrip.getChildCount();
+            int parentWidth = mTabStrip.getMeasuredWidth();
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             // We need to switch the text size based on whether the text is spanning 2 lines or not
             if (mTextView != null) {
-                int originWidth = (int) mTextView.getPaint().measureText(mTextView.getText().toString());
-                int parentChildCount = mTabStrip.getChildCount();
-                int parentWidth = mTabStrip.getMeasuredWidth();
+                int textWidth = (int) (mTextView.getPaint().measureText(mTextView.getText().toString()) + dpToPx(25));
                 int computeWidth = parentWidth / parentChildCount;
-                originWidth = Math.max(computeWidth, originWidth);
-//                int textWidth = (int) (mTextView.getPaint().measureText(mTextView.getText().toString()) + dpToPx(25));
 //                if(computeWidth>originWidth) {
 //                    textWidth = computeWidth;
 //                }
-                widthMeasureSpec = MeasureSpec.makeMeasureSpec(originWidth, MeasureSpec.EXACTLY);
+//                LogUtils.e("originWidth=" + originWidth + ";computeWidth=" + computeWidth + ";textWidth=" + textWidth);
+                widthMeasureSpec = MeasureSpec.makeMeasureSpec(Math.max(computeWidth, textWidth), MeasureSpec.EXACTLY);
                 // Now lets measure
                 super.onMeasure(widthMeasureSpec, heightMeasureSpec);
                 final Resources res = getResources();
                 float textSize = mTabTextSize;
                 int maxLines = mDefaultMaxLines;
-//                LogUtils.e("textWidth=" +textWidth + ";textlength=" + mTextView.getPaint().measureText(mTextView.getText().toString())
-//                        + ";width=" + getMeasuredWidth()+";originWidth="+originWidth+";computeWidth="+computeWidth+";childCount="+parentChildCount);
                 if (mIconView != null && mIconView.getVisibility() == VISIBLE) {
                     // If the icon view is being displayed, we limit the text to 1 line
                     maxLines = 1;
@@ -1794,7 +1790,6 @@ public class TabLayout extends HorizontalScrollView {
 
         @Override
         protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
-            LogUtils.e("SlidingTabStrip onMeasure width=" + MeasureSpec.getSize(widthMeasureSpec));
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
             if (MeasureSpec.getMode(widthMeasureSpec) != MeasureSpec.EXACTLY) {
