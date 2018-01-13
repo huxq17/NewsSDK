@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 
 public class SDKHelper {
-    public static void open(Context context) {
+    public static void init(Context context) {
         CustomApplication.init(context);
+    }
+
+    public static void open(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         startSDKActivity(context, intent);
     }

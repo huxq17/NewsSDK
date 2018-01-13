@@ -1523,17 +1523,13 @@ public class TabLayout extends HorizontalScrollView {
                 // Else, use the original width spec
                 widthMeasureSpec = origWidthMeasureSpec;
             }
-            int originWidth = (int) (mTextView.getPaint().measureText(mTextView.getText().toString()));
             int parentChildCount = mTabStrip.getChildCount();
             int parentWidth = mTabStrip.getMeasuredWidth();
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+//            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             // We need to switch the text size based on whether the text is spanning 2 lines or not
             if (mTextView != null) {
                 int textWidth = (int) (mTextView.getPaint().measureText(mTextView.getText().toString()) + dpToPx(25));
                 int computeWidth = parentWidth / parentChildCount;
-//                if(computeWidth>originWidth) {
-//                    textWidth = computeWidth;
-//                }
 //                LogUtils.e("originWidth=" + originWidth + ";computeWidth=" + computeWidth + ";textWidth=" + textWidth);
                 widthMeasureSpec = MeasureSpec.makeMeasureSpec(Math.max(computeWidth, textWidth), MeasureSpec.EXACTLY);
                 // Now lets measure

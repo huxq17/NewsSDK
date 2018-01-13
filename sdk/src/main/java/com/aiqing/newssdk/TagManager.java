@@ -85,8 +85,8 @@ public class TagManager implements View.OnClickListener, BackManager.OnBackListe
         } else {
             adapter.setData(Category.values(), mSelectedPosition);
         }
-        TranslateAnimation outAnimal = new TranslateAnimation(0f,
-                0f, -mScreenHeight, 0);
+        TranslateAnimation outAnimal = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, -1, Animation.RELATIVE_TO_SELF, 0);
         outAnimal.setDuration(mDuration);
         isAnimation = true;
         outAnimal.setAnimationListener(new Animation.AnimationListener() {
@@ -111,8 +111,8 @@ public class TagManager implements View.OnClickListener, BackManager.OnBackListe
     public void collapseTagLayout(final LoadListener listener) {
         if (isAnimation) return;
         BackManager.INSTANCE.removeBackListener(this);
-        TranslateAnimation outAnimal = new TranslateAnimation(0f,
-                0f, 0, -mScreenHeight);
+        TranslateAnimation outAnimal = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0, Animation.RELATIVE_TO_SELF, -1);
         outAnimal.setDuration(mDuration);
         mTagGridView.startAnimation(outAnimal);
         ivCollapse.startRotate(0, mDuration);
