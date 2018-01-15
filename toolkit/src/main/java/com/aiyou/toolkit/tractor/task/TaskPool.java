@@ -122,6 +122,10 @@ public class TaskPool {
         }
     }
 
+    public int getTaskSize() {
+        return mTaskQueue.size();
+    }
+
     /**
      * 取消任务
      *

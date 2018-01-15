@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
-        SDKHelper.open(this);
+//        SDKHelper.open(this);
     }
 
     long start = System.currentTimeMillis();
@@ -87,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         final File path = Environment.getExternalStorageDirectory();
-        ScanFileManager scanFileManager = new ScanFileManager(path);
-        scanFileManager.scan();
 
         if (!EasyPermissions.hasPermissions(this, WRITE_EXTERNAL_STORAGE)) {
             EasyPermissions.requestPermissions(this, "文件权限",
@@ -97,12 +95,14 @@ public class MainActivity extends AppCompatActivity {
             Observable.create(new ObservableOnSubscribe<Object>() {
                 @Override
                 public void subscribe(ObservableEmitter<Object> e) throws Exception {
-                    FileSizeCalc fileSizeCalc = new FileSizeCalc();
-                    try {
-                        fileSizeCalc.getFileSize(path);
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
+//                    FileSizeCalc fileSizeCalc = new FileSizeCalc();
+//                    try {
+//                        fileSizeCalc.getFileNum(path);
+//                    } catch (Exception e1) {
+//                        e1.printStackTrace();
+//                    }
+                    ScanFileManager scanFileManager = new ScanFileManager(path);
+                    scanFileManager.scan();
                     scanDir(path);
                 }
             }).subscribeOn(Schedulers.io())
