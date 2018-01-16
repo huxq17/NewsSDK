@@ -95,17 +95,13 @@ public class MainActivity extends AppCompatActivity {
             Observable.create(new ObservableOnSubscribe<Object>() {
                 @Override
                 public void subscribe(ObservableEmitter<Object> e) throws Exception {
-//                    FileSizeCalc fileSizeCalc = new FileSizeCalc();
-//                    try {
-//                        fileSizeCalc.getFileNum(path);
-//                    } catch (Exception e1) {
-//                        e1.printStackTrace();
-//                    }
-                    ScanFileManager scanFileManager = new ScanFileManager(path);
-                    scanFileManager.scan();
+                    FileSizeCalc fileSizeCalc = new FileSizeCalc();
+                    fileSizeCalc.getFileSize(path);
+//                    ScanFileManager scanFileManager = new ScanFileManager(path);
+//                    scanFileManager.scan();
                     scanDir(path);
                 }
-            }).subscribeOn(Schedulers.io())
+            }).subscribeOn(Schedulers.computation())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe();
         }

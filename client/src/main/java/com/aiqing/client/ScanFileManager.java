@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
@@ -29,19 +30,23 @@ public class ScanFileManager {
     private AtomicLong total = new AtomicLong();
     private AtomicInteger count = new AtomicInteger();
 
+    Semaphore semaphore = new Semaphore(poolSize);
+
     public ScanFileManager(File file) {
         rootFile = file;
         LogUtils.e("cpuCore=" + cpuCore);
         directories.add(file);
     }
 
-    private Object lock2 = new Object();
-
     public void scan() {
         final long start = System.currentTimeMillis();
         runNum = 0;
-        while (!directories.isEmpty()) {
-            File dir = directories.get(0);
+        while (!directories.isEmpty()||runNum>0) {
+            if(directories.size()==0){
+                LogUtils.e("runNum="+runNum);
+                break;
+            };
+            File dir = directories.remove(0);
             if (dir == null) {
                 continue;
             }
@@ -49,31 +54,17 @@ public class ScanFileManager {
             LogUtils.e("length=" + files.length);
             for (final File file : files) {
                 runNum++;
-                mExecutor.execute(new ScanRunnable(file));
-            }
-            final long end = System.currentTimeMillis();
-            LogUtils.e(String.format("wait 文件夹大小: %dMB%n", total.get() / (1024 * 1024)) + ";文件数量=" + count);
-            LogUtils.e(String.format("wait 所用时间: %.3fs%n", (end - start) / 1.0e3));
-            try {
-                synchronized (lock2) {
-                    LogUtils.e("wait");
-                    lock2.wait();
-                    LogUtils.e("wake up");
+                try {
+                    semaphore.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                mExecutor.execute(new ScanRunnable(file));
             }
         }
         final long end = System.currentTimeMillis();
         LogUtils.e(String.format("文件夹大小: %dMB%n", total.get() / (1024 * 1024)) + ";文件数量=" + count);
         LogUtils.e(String.format("所用时间: %.3fs%n", (end - start) / 1.0e3));
-    }
-
-    private void onEnd() {
-        LogUtils.e("onEnd");
-        synchronized (lock2) {
-            lock2.notify();
-        }
     }
 
     public class ScanRunnable implements Runnable {
@@ -91,15 +82,16 @@ public class ScanFileManager {
             } else {
                 directories.add(file);
 //                if (wait)
-                synchronized (lock2) {
-                    lock2.notifyAll();
-                }
-                LogUtils.e("run end");
             }
+            semaphore.release();
             runNum--;
-//            if (runNum == 0) {
-//                onEnd();
-//            }
+            if (runNum == 0) {
+                onEnd();
+            }
         }
+    }
+
+    private void onEnd() {
+        LogUtils.e("onEnd");
     }
 }
