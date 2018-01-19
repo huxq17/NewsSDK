@@ -48,6 +48,7 @@ public class FileSizeCalc {
     public void getFileSize(File rootDir) {
         final long start = System.currentTimeMillis();
         final int cpuCore = Runtime.getRuntime().availableProcessors();
+        LogUtils.e("cpucore="+cpuCore);
         final int poolSize = cpuCore + 1;
         ExecutorService service = Executors.newFixedThreadPool(poolSize);
         long total = 0;

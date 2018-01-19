@@ -50,18 +50,19 @@ task sync_aars() {
     def aar_path
     def dest_dir = aarPath
     outputs.upToDateWhen { false }
+    task copyJar(type: Copy)
+    task copyAAR(type: Copy)
     doLast {
         def aarFile = file(aarPath)
-        aarFile.listFiles().each {
-            if (it.getName().endsWith(".aar") && it.name.contains("debug")) {
-                aar_path = it.getPath()
-                def taskName = "copyAAR${it.name}"
-                jar_name = "libs/" + it.getName().replace(".aar", ".jar")
-                Copy copyAAR = task(taskName, type: Copy)
-                copyAAR.from zipTree(aar_path)
-                copyAAR.into dest_dir
-                copyAAR.rename 'classes.jar', jar_name
-                copyAAR.execute()
+        aarFile.listFiles().each { aar ->
+            if (aar.getName().endsWith(".aar") && it.name.contains("debug")) {
+                aar_path = aar.getPath()
+                jar_name = "libs/" + aar.getName().replace(".aar", ".jar")
+                copyAAR {
+                    from zipTree(aar_path)
+                    into dest_dir
+                    rename 'classes.jar', jar_name
+                }
                 delete aar_path
             }
         }
@@ -70,30 +71,29 @@ task sync_aars() {
                 configurations.api.getDependencies().each { configDep ->
                     variant.getCompileClasspath().each { fileDependency ->
                         if (fileDependency.absolutePath.contains(configDep.name)) {
-                            println "test "+fileDependency.name + ";dependency.name=" + configDep.name
-                            def taskName = "copyAAR${configDep.name}"
-                            Copy copyJar = task(taskName, type: Copy)
-                            copyJar.from fileDependency.path
-                            copyJar.into aarPath + "/libs/"
-                            copyJar.rename 'classes.jar', configDep.name + ".jar"
-                            copyJar.execute()
+                            println "test " + fileDependency.name + ";dependency.name=" + configDep.name
+                            copyJar {
+                                from fileDependency.path
+                                into aarPath + "/libs/"
+                                rename 'classes.jar', configDep.name + ".jar"
+                            }
                         }
                     }
                 }
             }
         }
+        task unZipAAR(type: Copy)
         configurations.compile.findAll {
-            it.name.endsWith(".aar")&&!it.getPath().contains("support")
+            it.name.endsWith(".aar") && !it.getPath().contains("support")
         }.collect {
             aar_path = it.getPath()
-            def taskName = "copyAAR${it.name}"
             jar_name = "libs/" + it.getName().replace(".aar", ".jar")
-            Copy copyAAR = task(taskName, type: Copy)
-            copyAAR.from zipTree(aar_path)
-            copyAAR.into dest_dir
-            copyAAR.rename 'classes.jar', jar_name
-            copyAAR.exclude 'AndroidManifest.xml','R.txt'
-            copyAAR.execute()
+            unZipAAR {
+                from zipTree(aar_path)
+                into dest_dir
+                rename 'classes.jar', jar_name
+                exclude 'AndroidManifest.xml', 'R.txt'
+            }
         }
         delete "build/libs/"
 
@@ -109,57 +109,63 @@ task sync_aars() {
 //        }.execute()
     }
 }
-task sync_jars(dependsOn: sync_aars) << {
-    //把所有依赖的.jar库都拷贝到build/aar/libs下
-    Copy copyJars = task(copyJarToLibs, type: Copy)
-    copyJars.from configurations.compile.findAll {
-        it.getName().endsWith(".jar")
-    }
-    copyJars.into aarlibPath
-    copyJars.execute()
-}
-task copy_jar(dependsOn: sync_jars) << {
-    def jarpath = buildDir.path + "/jar/"
-//    def filetree = fileTree(buildDir.path + "/aar/libs")
-    def aarlibs = file(aarlibPath)
-    //解压jar包
-    aarlibs.listFiles().each {
-        if (it.getName().endsWith(".jar")) {
-//            println "it.name=" + it.getName()
-            def taskName = "unZipJar {$it.name}"
-            Copy unZipJar = task(taskName, type: Copy)
-            unZipJar.from zipTree(it)
-            unZipJar.into jarpath
-            unZipJar.exclude {
-                it.path.contains('META-INF') || it.name.startsWith('.')
+task sync_jars(dependsOn: sync_aars) {
+    doLast {
+        //把所有依赖的.jar库都拷贝到build/aar/libs下
+        task(copyJarToLibs, type: Copy)
+        copyJarToLibs {
+            from configurations.compile.findAll {
+                it.getName().endsWith(".jar")
             }
-            unZipJar.execute()
+            into aarlibPath
         }
     }
-    //打出classes.jar
-    Zip packJar = task(packJar, type: Zip)
-    def classPath = jarpath
-    packJar.baseName = "classes"
-    packJar.extension = "jar"
-    packJar.from classPath
-    packJar.destinationDir = file(aarPath)
-    packJar.execute()
-    delete classPath
 }
-task makeaar(dependsOn: copy_jar) << {
-    task(gen_aar, type: Zip) {
-        //生成最终的aar包，注意libs目录需要被排除
-        def dest_dir = aarPath
-        def outputpath = buildDir.getPath() + "/libs/"
+task copy_jar(dependsOn: sync_jars) {
+    doLast {
+        def jarpath = buildDir.path + "/jar/"
+//    def filetree = fileTree(buildDir.path + "/aar/libs")
+        def aarlibs = file(aarlibPath)
+        //解压jar包
+        task unZipJar(type: Copy)
+        aarlibs.listFiles().each { lib ->
+            if (lib.getName().endsWith(".jar")) {
+                unZipJar {
+                    from zipTree(lib)
+                    into jarpath
+                    exclude {
+                        it.path.contains('META-INF') || it.name.startsWith('.')
+                    }
+                }
+            }
+        }
+        //打出classes.jar
+        task(packJar, type: Zip)
+        def classPath = jarpath
+        packJar {
+            baseName = "classes"
+            extension = "jar"
+            from classPath
+            destinationDir = file(aarPath)
+        }
+        delete classPath
+    }
+}
+task makeaar(dependsOn: copy_jar) {
+    doLast {
+        task(gen_aar, type: Zip)
+        gen_aar {
+            //生成最终的aar包，注意libs目录需要被排除
+            def dest_dir = aarPath
+            def outputpath = buildDir.getPath() + "/libs/"
 //        delete outputpath
-        baseName = getJarName()
-        extension = "aar"
-        destinationDir = file(outputpath)
-        from dest_dir
-        exclude "libs"
-    }.execute()
-    //删除
-//    delete aarPath
+            baseName = getJarName()
+            extension = "aar"
+            destinationDir = file(outputpath)
+            from dest_dir
+            exclude "libs"
+        }
+    }
 }
 //afterEvaluate {
 //    def dx = tasks.findByName("assembleRelease")
