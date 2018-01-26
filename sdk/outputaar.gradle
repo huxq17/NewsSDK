@@ -45,20 +45,32 @@ task aarRelease(type: Copy) {
     include toolkitname
     rename(toolkitname, getToolkitName())
 }
+//configurations {
+//    //declaring new configuration that will be used to associate with artifacts
+//    schema
+//}
+//
+//task schemaJar(type: Jar) {
+//    //some imaginary task that creates a jar artifact with some schema
+//}
+
+//associating the task that produces the artifact with the configuration
+//artifacts {
+//    //configuration name and the task:
+//    schema schemaJar
+//}
 task sync_aars() {
     def jar_name
     def aar_path
     def dest_dir = aarPath
     outputs.upToDateWhen { false }
-    task copyJar(type: Copy)
-    task copyAAR(type: Copy)
     doLast {
         def aarFile = file(aarPath)
         aarFile.listFiles().each { aar ->
             if (aar.getName().endsWith(".aar") && it.name.contains("debug")) {
                 aar_path = aar.getPath()
                 jar_name = "libs/" + aar.getName().replace(".aar", ".jar")
-                copyAAR {
+                copy {
                     from zipTree(aar_path)
                     into dest_dir
                     rename 'classes.jar', jar_name
@@ -72,7 +84,7 @@ task sync_aars() {
                     variant.getCompileClasspath().each { fileDependency ->
                         if (fileDependency.absolutePath.contains(configDep.name)) {
                             println "test " + fileDependency.name + ";dependency.name=" + configDep.name
-                            copyJar {
+                            copy {
                                 from fileDependency.path
                                 into aarPath + "/libs/"
                                 rename 'classes.jar', configDep.name + ".jar"
@@ -82,13 +94,17 @@ task sync_aars() {
                 }
             }
         }
-        task unZipAAR(type: Copy)
+//        println "configurations.schema.allArtifacts.size()=${configurations.schema.allArtifacts.size()}"
+//        configurations.schema.allArtifacts.findAll { artifact ->
+//            println artifact.name
+//            println "artifact.file=${artifact.file.absolutePath}"
+//        }
         configurations.compile.findAll {
             it.name.endsWith(".aar") && !it.getPath().contains("support")
         }.collect {
             aar_path = it.getPath()
             jar_name = "libs/" + it.getName().replace(".aar", ".jar")
-            unZipAAR {
+            copy {
                 from zipTree(aar_path)
                 into dest_dir
                 rename 'classes.jar', jar_name
@@ -112,8 +128,7 @@ task sync_aars() {
 task sync_jars(dependsOn: sync_aars) {
     doLast {
         //把所有依赖的.jar库都拷贝到build/aar/libs下
-        task(copyJarToLibs, type: Copy)
-        copyJarToLibs {
+        copy {
             from configurations.compile.findAll {
                 it.getName().endsWith(".jar")
             }
@@ -127,10 +142,9 @@ task copy_jar(dependsOn: sync_jars) {
 //    def filetree = fileTree(buildDir.path + "/aar/libs")
         def aarlibs = file(aarlibPath)
         //解压jar包
-        task unZipJar(type: Copy)
         aarlibs.listFiles().each { lib ->
             if (lib.getName().endsWith(".jar")) {
-                unZipJar {
+                copy {
                     from zipTree(lib)
                     into jarpath
                     exclude {
@@ -140,20 +154,21 @@ task copy_jar(dependsOn: sync_jars) {
             }
         }
         //打出classes.jar
-        task(packJar, type: Zip)
         def classPath = jarpath
+        task packJar(type: Zip)
+//        zip{}
         packJar {
             baseName = "classes"
             extension = "jar"
             from classPath
             destinationDir = file(aarPath)
-        }
+        }.execute()
         delete classPath
     }
 }
 task makeaar(dependsOn: copy_jar) {
     doLast {
-        task(gen_aar, type: Zip)
+        task gen_aar(type: Zip)
         gen_aar {
             //生成最终的aar包，注意libs目录需要被排除
             def dest_dir = aarPath
@@ -164,7 +179,7 @@ task makeaar(dependsOn: copy_jar) {
             destinationDir = file(outputpath)
             from dest_dir
             exclude "libs"
-        }
+        }.execute()
     }
 }
 //afterEvaluate {
