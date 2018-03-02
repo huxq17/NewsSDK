@@ -48,3 +48,8 @@ dependencies {
 
     implementation 'pub.devrel:easypermissions:1.1.1'
 }
+afterEvaluate{
+    android.applicationVariants.all{
+        println "application variant=$it.flavorName"+";name=$it.name"
+    }
+}

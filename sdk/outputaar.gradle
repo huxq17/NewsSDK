@@ -1,7 +1,10 @@
 import java.text.SimpleDateFormat
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 def aarPath = buildDir.path + "/outputs/aar/"
 def aarlibPath = aarPath + "libs/"
+String BUILD_VARIANT
 
 def buildTime() {
     def df = new SimpleDateFormat("yyyyMMdd")
@@ -67,7 +70,7 @@ task sync_aars() {
     doLast {
         def aarFile = file(aarPath)
         aarFile.listFiles().each { aar ->
-            if (aar.getName().endsWith(".aar") && it.name.contains("debug")) {
+            if (aar.getName().endsWith(".aar")) {
                 aar_path = aar.getPath()
                 jar_name = "libs/" + aar.getName().replace(".aar", ".jar")
                 copy {
@@ -79,7 +82,7 @@ task sync_aars() {
             }
         }
         android.libraryVariants.all { variant ->
-            if (variant.name.contains("debug")) {
+            if (variant.name.contains(BUILD_VARIANT.toLowerCase())) {
                 configurations.api.getDependencies().each { configDep ->
                     variant.getCompileClasspath().each { fileDependency ->
                         if (fileDependency.absolutePath.contains(configDep.name)) {
@@ -182,42 +185,25 @@ task makeaar(dependsOn: copy_jar) {
         }.execute()
     }
 }
-//afterEvaluate {
-//    def dx = tasks.findByName("assembleRelease")
-//
-//    makeaar.dependsOn dx.taskDependencies.getDependencies(dx)
-//    makeJar.dependsOn makeaar
-//    dx.dependsOn makeJar
-////    disableDebugBuild()
-//}
 afterEvaluate {
-//    configurations.api.canBeResolved = true
-//    def dx = tasks.findByName("transformClassesWithDexForDebug")
-//
-//    makeaar.dependsOn bundleRelease
-//    makeJar.dependsOn makeaar
-//    dx.dependsOn makeJar
-//    project.tasks.getByName("bundleRelease") {
-//        it.doLast {
-//            println "bundleRelease dolast"
-//            sync_aars.execute()
-//            sync_jars.execute()
-//            copy_jar.execute()
-//            makeaar.execute()
-//        }
-//    }
-    project(":toolkit").tasks.getNames().each {
-//        println "app task.name=" + it
+    android.libraryVariants.all { variant ->
+        char[] cs = name.toCharArray()
+        cs[0] -= 32
+        Task task = tasks.getByName("assemble${String.valueOf(cs)}")
+        task.outputs.upToDateWhen { false }
+        task.finalizedBy makeaar
     }
-//        println "app:assemble.dependesOn = "+it.toString()
-//    }
-    project.tasks.getByName("assembleDebug").outputs.upToDateWhen { false }
-    project.tasks.getByName("assembleDebug").finalizedBy makeaar
-    //:app:_debugApk
+    String regex = "^pre(.+)Build\$"
     tasks.matching {
-        it.name == 'transformClassesWithDexForDebug'
-    }.each { tk ->
-        tk.dependsOn(makeaar)
+        Pattern.matches(regex, it.name) && !it.name.contains("Test")
+    }.each {
+        it.doFirst {
+            Pattern p = Pattern.compile(regex)
+            Matcher m = p.matcher(it.name)
+            if (m.matches()) {
+                BUILD_VARIANT = m.group(1)
+            }
+        }
     }
 }
 gradle.getTaskGraph().whenReady {
